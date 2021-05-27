@@ -1,0 +1,82 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'org.springframework.experimental.aot' version '0.10.0-SNAPSHOT'
+	id 'org.hibernate.orm'
+}
+
+group = 'com.evotek'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	maven { url 'https://repo.spring.io/snapshot' }
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+	set('springCloudVersion', "2020.0.3-SNAPSHOT")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+	implementation 'org.springframework.session:spring-session-data-redis'
+	implementation 'org.springframework.session:spring-session-jdbc'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'io.r2dbc:r2dbc-postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.batch:spring-batch-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+bootBuildImage {
+	builder = 'paketobuildpacks/builder:tiny'
+	environment = ['BP_NATIVE_IMAGE': 'true']
+}
+
+hibernate {
+	enhance {
+		enableLazyInitialization = true
+		enableDirtyTracking = true
+		enableAssociationManagement = true
+		enableExtendedEnhancement = false
+	}
+}
