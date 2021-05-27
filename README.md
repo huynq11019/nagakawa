@@ -1,7 +1,5 @@
 # nagakawa-guarantee-be
-# covid test BE
-
-project covid test be
+project nagakawa-guarantee-be
 
 Cai Lombok plugin
 
