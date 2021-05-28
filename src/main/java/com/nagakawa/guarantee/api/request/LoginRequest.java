@@ -1,0 +1,23 @@
+package com.nagakawa.guarantee.api.request;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class LoginRequest {
+	@NotNull
+	private String username;
+
+	@NotNull
+	private String password;
+
+	private Boolean rememberMe;
+
+	@Override
+	public String toString() {
+		return "LoginVM{" + "username='" + username + '\'' + ", rememberMe=" + rememberMe + '}';
+	}
+}

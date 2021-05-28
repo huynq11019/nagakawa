@@ -1,14 +1,14 @@
 # nagakawa-guarantee-be
 project nagakawa-guarantee-be
 
-Cai Lombok plugin
+Cài Lombok plugin
 
 https://projectlombok.org/setup/intellij
 
 Tao DB local:
 
 CREATE DATABASE nagakawa_guarantee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'nagakawa_guarantee'@'%' IDENTIFIED BY 'CVT1234a@';
+CREATE USER 'nagakawa_guarantee'@'%' IDENTIFIED BY 'Nagakawa1234a@';
 GRANT ALL PRIVILEGES ON nagakawa_guarantee.* TO 'nagakawa_guarantee'@'%';
 
 ## Quản lí Database Changelog
