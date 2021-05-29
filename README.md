@@ -5,11 +5,11 @@ Cài Lombok plugin
 
 https://projectlombok.org/setup/intellij
 
-Tao DB local:
+Tạo DB local bằng PostgreSQL:
 
-CREATE DATABASE nagakawa_guarantee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'nagakawa_guarantee'@'%' IDENTIFIED BY 'Nagakawa1234a@';
-GRANT ALL PRIVILEGES ON nagakawa_guarantee.* TO 'nagakawa_guarantee'@'%';
+CREATE USER nagakawa_guarantee WITH PASSWORD 'Nagakawa1234a@';
+CREATE DATABASE nagakawa_guarantee WITH OWNER =  nagakawa_guarantee ENCODING = 'UTF-8'	LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = 'pg_default' CONNECTION LIMIT = -1;
+GRANT ALL PRIVILEGES ON DATABASE nagakawa_guarantee TO nagakawa_guarantee;
 
 ## Quản lí Database Changelog
 

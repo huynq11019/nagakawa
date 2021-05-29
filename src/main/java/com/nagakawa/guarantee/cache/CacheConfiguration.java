@@ -3,6 +3,7 @@ package com.nagakawa.guarantee.cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -19,17 +20,16 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.nagakawa.guarantee.configuration.EnvConstants;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableCaching
-@RequiredArgsConstructor
 public class CacheConfiguration implements DisposableBean {
     private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
     
-    private final Environment env;
+    @Autowired
+    private Environment env;
     
-    private final CacheProperties properties;
+    @Autowired
+    private CacheProperties properties;
 
     @Override
     public void destroy() throws Exception {
@@ -49,7 +49,7 @@ public class CacheConfiguration implements DisposableBean {
     public HazelcastInstance hazelcastInstance() {
         log.info("Configuring Hazelcast");
         
-        HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName("demo");
+        HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName("nagakawa_guarantee");
         
         if (hazelCastInstance != null) {
             log.info("Hazelcast already initialized");
@@ -59,7 +59,7 @@ public class CacheConfiguration implements DisposableBean {
         
         Config config = new Config();
         
-        config.setInstanceName("nagakawa-guarantee");
+        config.setInstanceName("nagakawa_guarantee");
         config.getNetworkConfig().setPort(5704);
         config.getNetworkConfig().setPortAutoIncrement(true);
         // In development, remove multicast auto-configuration
