@@ -6,8 +6,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.12.BUILD-SNAPSHOT</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<version>2.3.11.RELEASE</version>
+		<relativePath />
 	</parent>
 
 	<groupId>com.nagakawa</groupId>
@@ -24,7 +24,7 @@
 		<!--ADD YOUR CUSTOM PROPERTIES HERE -->
 		<maven.version>3.3.9</maven.version>
 		<java.version>1.8</java.version>
-		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
+		<spring-cloud.version>Hoxton.SR11</spring-cloud.version>
 		<hibernate.version>5.4.12.Final</hibernate.version>
 		<mapstruct.version>1.4.1.Final</mapstruct.version>
 		<jaxb-runtime.version>2.3.2</jaxb-runtime.version>
