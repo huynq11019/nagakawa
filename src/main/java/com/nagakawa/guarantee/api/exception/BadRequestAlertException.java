@@ -21,12 +21,12 @@ public class BadRequestAlertException extends AbstractThrowableProblem {
 	private final String errorKey;
 
 	public BadRequestAlertException(String defaultMessage, String entityName, String errorKey) {
-		this(ErrorConstants.DEFAULT_TYPE, defaultMessage, entityName, errorKey);
+		this(ErrorConstants.Type.DEFAULT_TYPE, defaultMessage, entityName, errorKey);
 	}
 
 	public BadRequestAlertException(String defaultMessage, String entityName, String errorKey,
 			Map<String, Object> params, Map<String, Object> values) {
-		super(ErrorConstants.DEFAULT_TYPE, defaultMessage, Status.BAD_REQUEST, null, null, null, params);
+		super(ErrorConstants.Type.DEFAULT_TYPE, defaultMessage, Status.BAD_REQUEST, null, null, null, params);
 		
 		params.put("message", "error." + errorKey);
 		params.put("params", values);

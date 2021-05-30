@@ -14,8 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -28,16 +28,16 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import com.nagakawa.guarantee.util.Constants;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode;	
 
 /**
  * A user.
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "users")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-@EqualsAndHashCode(callSuper=false)
 @NamedEntityGraph(name = "roles", attributeNodes = @NamedAttributeNode("roles"))
 public class User extends AbstractAuditingEntity implements Serializable {
 
@@ -82,7 +82,9 @@ public class User extends AbstractAuditingEntity implements Serializable {
 	private Integer roleUpdatable;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+	@JoinTable(name = "user_roles", joinColumns = {
+			@JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
+					@JoinColumn(name = "role_id", referencedColumnName = "id") })
 	@BatchSize(size = 20)
 	private Set<Role> roles = new HashSet<>();
 }

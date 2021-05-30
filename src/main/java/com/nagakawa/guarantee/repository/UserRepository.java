@@ -16,6 +16,7 @@ import com.nagakawa.guarantee.repository.extend.UserRepositoryExtend;
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryExtend {
 	List<User> findByUsernameIgnoreCase(String username);
 
+	@EntityGraph(attributePaths = "roles")
     Optional<User> findByUsername(String username);
 
     Optional<User> findByUsernameIgnoreCaseAndStatusIs(String username, Integer status);

@@ -18,6 +18,6 @@ public class LoginRequest {
 
 	@Override
 	public String toString() {
-		return "LoginVM{" + "username='" + username + '\'' + ", rememberMe=" + rememberMe + '}';
+		return "LoginRequest{" + "username='" + username + '\'' + ", rememberMe=" + rememberMe + '}';
 	}
 }

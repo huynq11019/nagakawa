@@ -1,0 +1,131 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="LinhLH (generated)" id="1622339225264-1">
+        <createTable tableName="persistent_audit_event">
+            <column autoIncrement="true" name="event_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="persistent_audit_eventPK"/>
+            </column>
+            <column name="event_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="event_type" type="VARCHAR(255)"/>
+            <column name="principal" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-2">
+        <createTable tableName="persistent_audit_evt_data">
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-3">
+        <createTable tableName="privilege">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="privilegePK"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-4">
+        <createTable tableName="role">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="rolePK"/>
+            </column>
+            <column name="created_by" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_modified_by" type="VARCHAR(50)"/>
+            <column name="last_modified_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="1" name="updatable" type="INTEGER"/>
+            <column defaultValueNumeric="0" name="permanent" type="INTEGER"/>
+            <column defaultValueNumeric="1" name="status" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-5">
+        <createTable tableName="roles_privileges">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="privilege_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-6">
+        <createTable tableName="user_login">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_loginPK"/>
+            </column>
+            <column name="ip" type="VARCHAR(75)"/>
+            <column name="login_time" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="success" type="BOOLEAN"/>
+            <column name="user_name" type="VARCHAR(75)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-7">
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-8">
+        <createTable tableName="users">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="usersPK"/>
+            </column>
+            <column name="created_by" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_modified_by" type="VARCHAR(50)"/>
+            <column name="last_modified_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="date_of_birth" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(254)"/>
+            <column name="fullname" type="VARCHAR(200)"/>
+            <column name="password" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(50)"/>
+            <column defaultValueNumeric="1" name="role_updatable" type="INTEGER"/>
+            <column defaultValueNumeric="1" name="status" type="INTEGER"/>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-9">
+        <addUniqueConstraint columnNames="email" constraintName="UC_USERSEMAIL_COL" tableName="users"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-10">
+        <addUniqueConstraint columnNames="username" constraintName="UC_USERSUSERNAME_COL" tableName="users"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-11">
+        <addForeignKeyConstraint baseColumnNames="privilege_id" baseTableName="roles_privileges" constraintName="FK5yjwxw2gvfyu76j3rgqwo685u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="privilege" validate="true"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-12">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="roles_privileges" constraintName="FK9h2vewsqh8luhfq71xokh4who" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="role" validate="true"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-13">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="persistent_audit_evt_data" constraintName="FK9ynvwlu7w4uqpjlxvk9kiscqs" deferrable="false" initiallyDeferred="false" referencedColumnNames="event_id" referencedTableName="persistent_audit_event" validate="true"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-14">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_roles" constraintName="FKhfh9dx7w3ubf1co1vdev94g3f" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="LinhLH (generated)" id="1622339225264-15">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user_roles" constraintName="FKrhfovtciq1l558cw6udg0h0d3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="role" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
