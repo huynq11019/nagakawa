@@ -29,7 +29,6 @@ public class UserLogin implements Serializable{
 	@Column(name = "ip", length = 75)
 	private String ip;
 	
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "login_time", length = 7)
 	private Instant loginTime;
 	

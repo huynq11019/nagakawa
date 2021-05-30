@@ -17,7 +17,7 @@
 logging:
   level:
     ROOT: INFO
-    com.evotek.covidtest: DEBUG
+    com.nagakawa.guarantee: DEBUG
 
 spring:
   profiles:
@@ -27,8 +27,8 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/nagakawa_guarantee?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
-    #url: jdbc:mysql://192.168.2.100:3306/nagakawa_guarantee?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:postgresql://localhost:5432/nagakawa_guarantee
+    #url=jdbc:postgresql://192.168.2.100:5432/nagakawa_guarantee
     username: nagakawa_guarantee
     password: Nagakawa1234a@
     hikari:
@@ -40,7 +40,7 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
     show-sql: true
     properties:
       hibernate.id.new_generator_mappings: true
@@ -79,18 +79,20 @@ server:
 #                http-only: true
 #                path: /
 security:
+  cache:
+    url-patterns: '/i18n/*,/content/*,/app/*'
   # CORS is only enabled by default with the "dev" profile, so BrowserSync can access the API
   cors:
     allowed-origins: '*'
     allowed-methods: '*'
     allowed-headers: '*'
-    exposed-headers: 'Authorization,Link,X-Total-Count,X-Total-Active-Count,X-Action-Allow,X-Action-Mesage'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-Total-Active-Count,X-Action-Allow,X-Action-Mesage,X-Action-Alert,X-Action-Params,X-Action-Error'
     allow-credentials: true
     max-age: 1800
   authentication:
     jwt:
       # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
-      base64-secret: LNRP5b4+y9LUC3oV9WuGIf4GYT8GDYVIlHCYhywX3edfVKMrahN842YmCEVo2OX8Rs2G/eoGgKy/+/PvhT1Q4Id9pBMYdjcwJP6OyTcSUnO/tw65I/CwtYQy6uzJ+DBVkAwLoh+yPCvJym7lbVipcaD7me1BiDLp0NCfNYaetRzOxOxFcA4E67lpIHrPsb97C/SuiQL+cre7UXfFHJZxGR1tOM2IKQytUe0Q11rkPRggVTvIOfTRPeBAhvhjRLxPxpxy3Xe8LAUpdthKtKf7yFUHL+jqpwQ9cvILCLuH9sRVn6szBTrrvxMsmY79o2o8ZiGIeuDMBt4ahVdvavWt6g==
+      base64-secret: 'LNRP5b4+y9LUC3oV9WuGIf4GYT8GDYVIlHCYhywX3edfVKMrahN842YmCEVo2OX8Rs2G/eoGgKy/+/PvhT1Q4Id9pBMYdjcwJP6OyTcSUnO/tw65I/CwtYQy6uzJ+DBVkAwLoh+yPCvJym7lbVipcaD7me1BiDLp0NCfNYaetRzOxOxFcA4E67lpIHrPsb97C/SuiQL+cre7UXfFHJZxGR1tOM2IKQytUe0Q11rkPRggVTvIOfTRPeBAhvhjRLxPxpxy3Xe8LAUpdthKtKf7yFUHL+jqpwQ9cvILCLuH9sRVn6szBTrrvxMsmY79o2o8ZiGIeuDMBt4ahVdvavWt6g=='
       # Token is valid 24 hours
       token-validity-in-seconds: 86400
       # Token is valid 30 days

@@ -1,6 +1,7 @@
 package com.nagakawa.guarantee.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -30,9 +31,9 @@ public class Role extends AbstractAuditingEntity implements Serializable {
 
 	@Column
 	private String name;
-	
-	@ManyToMany(mappedBy = "roles")
-	private Set<User> users;
+//	
+//	@ManyToMany(mappedBy = "roles")
+//	private Set<User> users = new HashSet<>();
 
 	@Column(name = "status", length = 1, columnDefinition = "integer default 1")
 	private int status;
@@ -41,6 +42,8 @@ public class Role extends AbstractAuditingEntity implements Serializable {
 	private String description;
 	
 	@ManyToMany
-	@JoinTable(name = "roles_privileges", joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "privilege_id", referencedColumnName = "id"))
-	private Set<Privilege> privileges;
+	@JoinTable(name = "roles_privileges", joinColumns = {
+			@JoinColumn(name = "role_id", referencedColumnName = "id") }, inverseJoinColumns = {
+					@JoinColumn(name = "privilege_id", referencedColumnName = "id") })
+	private Set<Privilege> privileges = new HashSet<>();
 }

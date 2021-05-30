@@ -10,6 +10,7 @@ import lombok.Setter;
 @Configuration
 @ConfigurationProperties(prefix = "cache")
 @Getter
+@Setter
 public class CacheProperties {
     private String localIp;
 

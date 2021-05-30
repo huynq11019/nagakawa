@@ -1,6 +1,7 @@
 package com.nagakawa.guarantee.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -26,8 +27,8 @@ public class Privilege implements Serializable {
 
 	@Column(length = 255)
 	private String description;
-	
-	@ManyToMany(mappedBy = "privileges")
-	private Set<Role> roles;
+//	
+//	@ManyToMany(mappedBy = "privileges")
+//	private Set<Role> roles = new HashSet<>();
 
 }

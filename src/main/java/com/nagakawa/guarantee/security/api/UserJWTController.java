@@ -25,7 +25,8 @@ import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.dto.UserDTO;
 import com.nagakawa.guarantee.security.jwt.JWTFilter;
 import com.nagakawa.guarantee.security.jwt.JWTToken;
-import com.nagakawa.guarantee.security.jwt.JwtTokenUtil;
+import com.nagakawa.guarantee.security.jwt.JwtTokenProvider;
+import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.service.UserService;
 import com.nagakawa.guarantee.service.mapper.UserMapper;
 import com.nagakawa.guarantee.util.Constants;
@@ -39,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserJWTController {
-	private final JwtTokenUtil jwtTokenUtil;
+	private final JwtTokenProvider jwtTokenUtil;
 
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -68,7 +69,7 @@ public class UserJWTController {
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 
-		httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+		httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, SecurityConstants.Jwt.TOKEN_START + jwt);
 
 		return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
 	}

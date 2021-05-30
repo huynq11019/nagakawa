@@ -6,15 +6,15 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.12.BUILD-SNAPSHOT</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<version>2.3.11.RELEASE</version>
+		<relativePath />
 	</parent>
 
 	<groupId>com.nagakawa</groupId>
 	<artifactId>nagakawa-guarantee</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>nagakawa-guarantee</name>
+	<name>nagakawa-guarantee-backend</name>
 	<description>Nagakawa Guarantee and Customer Care System</description>
 
 	<properties>
@@ -24,7 +24,7 @@
 		<!--ADD YOUR CUSTOM PROPERTIES HERE -->
 		<maven.version>3.3.9</maven.version>
 		<java.version>1.8</java.version>
-		<spring-cloud.version>Hoxton.BUILD-SNAPSHOT</spring-cloud.version>
+		<spring-cloud.version>Hoxton.SR11</spring-cloud.version>
 		<hibernate.version>5.4.12.Final</hibernate.version>
 		<mapstruct.version>1.4.1.Final</mapstruct.version>
 		<jaxb-runtime.version>2.3.2</jaxb-runtime.version>
@@ -39,6 +39,7 @@
 		<problem-spring-web.version>0.23.0</problem-spring-web.version>
 		<commons-compress.version>1.18</commons-compress.version>
 		<commons-net.version>3.6</commons-net.version>
+		<postgresql.version>42.2.20</postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -78,6 +79,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>io.lettuce</groupId>
+					<artifactId>lettuce-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 			<exclusions>
@@ -88,8 +103,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>

@@ -16,7 +16,7 @@
 logging:
   level:
     ROOT: INFO
-    com.evotek.covidtest: DEBUG
+    com.nagakawa.guarantee: DEBUG
 
 spring:
   profiles:

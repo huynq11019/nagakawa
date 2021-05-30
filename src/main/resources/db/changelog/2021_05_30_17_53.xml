@@ -1,0 +1,83 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	<changeSet author="LinhLH" id="insert-users-01">
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="username" value="superadmin"/>
+            <column name="fullname" value="Super Admin"/>
+            <column name="email" value="superadmin@email.com"/>
+            <column name="password" value="$2a$11$ly3HQ3E2eryp1jUKX7C77uLveflgxmEDnfFUW0NH4IgnrutSiutRS"/>
+            <column name="created_by" value="0"/>
+            <column name="role_updatable" value="0"/>
+            <column name="status" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="LinhLH" id="insert-privilege-01">
+        <insert tableName="privilege">
+            <column name="id" value="1"/>
+            <column name="name" value="VIEW_USER"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="id" value="2"/>
+            <column name="name" value="ADD_USER"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="id" value="3"/>
+            <column name="name" value="EDIT_USER"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="id" value="4"/>
+            <column name="name" value="DELETE_USER"/>
+        </insert>
+    </changeSet>
+    <changeSet author="LinhLH" id="insert-role-01">
+    	<insert tableName="role">
+    		<column name="id" value="1"/>
+            <column name="name" value="SUPERADMIN"/>
+            <column name="created_by" value="superadmin"/>
+            <column name="permanent" value="1"/>
+            <column name="updatable" value="0"/>
+            <column name="status" value="1"/>
+    	</insert>
+    	<insert tableName="role">
+    		<column name="id" value="2"/>
+            <column name="name" value="ADMIN"/>
+            <column name="created_by" value="superadmin"/>
+            <column name="permanent" value="1"/>
+            <column name="updatable" value="1"/>
+            <column name="status" value="1"/>
+    	</insert>
+    	<insert tableName="role">
+    		<column name="id" value="3"/>
+            <column name="name" value="USER"/>
+            <column name="created_by" value="superadmin"/>
+            <column name="permanent" value="1"/>
+            <column name="updatable" value="1"/>
+            <column name="status" value="1"/>
+    	</insert>
+    </changeSet>
+    <changeSet author="LinhLH" id="insert-user_role-01">
+    	<insert tableName="user_roles">
+    		<column name="user_id" value="1"/>
+    		<column name="role_id" value="1"/>
+    	</insert>
+    </changeSet>
+    <changeSet author="LinhLH" id="insert-roles_privileges-01">
+    	<insert tableName="roles_privileges">
+    		<column name="role_id" value="1"/>
+    		<column name="privilege_id" value="1"/>
+    	</insert>
+    	<insert tableName="roles_privileges">
+    		<column name="role_id" value="1"/>
+    		<column name="privilege_id" value="2"/>
+    	</insert>
+    	<insert tableName="roles_privileges">
+    		<column name="role_id" value="1"/>
+    		<column name="privilege_id" value="3"/>
+    	</insert>
+    	<insert tableName="roles_privileges">
+    		<column name="role_id" value="1"/>
+    		<column name="privilege_id" value="4"/>
+    	</insert>
+    </changeSet>
+</databaseChangeLog>
