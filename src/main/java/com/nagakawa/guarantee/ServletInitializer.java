@@ -65,6 +65,7 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
 	@PostConstruct
     public void connection() {
         try {
+            //check if redis server is available
         	redisTemplate.getConnectionFactory().getConnection();
         } catch (Exception e) {
             System.out.println("-------------------------------------------------------------------------------------------");

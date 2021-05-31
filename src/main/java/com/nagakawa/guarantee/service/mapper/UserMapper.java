@@ -19,7 +19,7 @@ public interface UserMapper extends EntityMapper<UserDTO, User> {
 		User user = new User();
 		
 		user.setId(id);
-		
+				
 		return user;
 	}
 }

@@ -31,9 +31,6 @@ public class Role extends AbstractAuditingEntity implements Serializable {
 
 	@Column
 	private String name;
-//	
-//	@ManyToMany(mappedBy = "roles")
-//	private Set<User> users = new HashSet<>();
 
 	@Column(name = "status", length = 1, columnDefinition = "integer default 1")
 	private int status;

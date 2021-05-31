@@ -20,10 +20,16 @@ public interface SecurityConstants {
 	}
 
 	public interface Jwt {
+	    public static final String AUTHORIZATION_HEADER = "Authorization";
+	    
 		public static final String TOKEN_START = "Bearer ";
 
 		public static final String PRIVILEGES = "privileges";
 
 		public static final String HASHKEY = "hash-key";
+		
+		public static final String REFRESH_TOKEN = "refresh-token";
+		
+		public static final String USER_DETAIL = "user-detail";
 	}
 }

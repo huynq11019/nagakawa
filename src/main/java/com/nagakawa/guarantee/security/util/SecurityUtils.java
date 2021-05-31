@@ -84,10 +84,9 @@ public final class SecurityUtils {
 	 */
 	public static boolean isAuthenticated() {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
+		
 		return Optional.ofNullable(securityContext.getAuthentication())
-				.map(authentication -> authentication.getAuthorities().stream()
-						.noneMatch(grantedAuthority -> grantedAuthority.getAuthority()
-								.equals(SecurityConstants.SystemRole.ANONYMOUS)))
+				.map(authentication -> !authentication.getAuthorities().isEmpty())
 				.orElse(false);
 	}
 
@@ -100,7 +99,7 @@ public final class SecurityUtils {
 	 * @param authority the authority to check.
 	 * @return true if the current user has the authority, false otherwise.
 	 */
-	public static boolean isCurrentUserInRole(String authority) {
+	public static boolean isCurrentUserHasPrivilege(String authority) {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		return Optional
 				.ofNullable(securityContext.getAuthentication()).map(authentication -> authentication.getAuthorities()
