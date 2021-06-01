@@ -11,11 +11,17 @@ public class AuthenticationProperties {
     @Value("${security.authentication.jwt.base64-secret}")
 	private String base64Secret;
 	
-    @Value("${security.authentication.jwt.token-validity-in-seconds}")
-    private long tokenValidityInSeconds;
+    @Value("${security.authentication.jwt.token-duration}")
+    private int tokenDuration;
     
-    @Value("${security.authentication.jwt.token-validity-in-seconds-for-remember-me}")
-    private long tokenValidityInSecondsForRememberMe;
+    @Value("${security.authentication.jwt.token-remember-me-duration}")
+    private int tokenRememberMeDuration;
+    
+    @Value("${security.authentication.jwt.refesh-token-duration}")
+    private int refeshTokenDuration;
+    
+    @Value("${security.authentication.jwt.data-duration}")
+    private int dataDuration;
     
     @Value("${security.cache.url-patterns}")
     private String[] urlPatterns;

@@ -25,6 +25,8 @@ public class UserPrincipal extends org.springframework.security.core.userdetails
 	private User user;
 
 	private Collection<String> roles;
+	
+	private String hashKey;
 	/**
 	 * @param username
 	 * @param password

@@ -63,9 +63,10 @@ spring:
       starttls.enable: true
       ssl.trust: smtp.gmail.com
   messages:
-    cache-duration: PT1S # 1 second, see the ISO 8601 standard
-    basename: i18n/messages
-    encoding: UTF-8
+    encoding: 'UTF-8'
+    use-code-as-default-message: true
+    basename: i18n/labels
+    cache-duration: 60    # 60 second, see the ISO 8601 standard
   thymeleaf:
     cache: false
   social:
@@ -84,7 +85,7 @@ security:
     allowed-origins: '*'
     allowed-methods: '*'
     allowed-headers: '*'
-    exposed-headers: 'Authorization,Link,X-Total-Count,X-Total-Active-Count,X-Action-Allow,X-Action-Mesage'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-Action-Mesage,X-Action-Params'
     allow-credentials: true
     max-age: 1800
   authentication:

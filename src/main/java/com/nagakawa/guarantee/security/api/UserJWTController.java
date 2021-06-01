@@ -20,17 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nagakawa.guarantee.api.exception.BadRequestAlertException;
-import com.nagakawa.guarantee.api.request.LoginRequest;
+import com.nagakawa.guarantee.messages.LabelKey;
+import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.dto.UserDTO;
 import com.nagakawa.guarantee.security.jwt.JWTFilter;
-import com.nagakawa.guarantee.security.jwt.JWTToken;
 import com.nagakawa.guarantee.security.jwt.JwtTokenProvider;
+import com.nagakawa.guarantee.security.request.LoginRequest;
+import com.nagakawa.guarantee.security.request.TokenRefreshRequest;
+import com.nagakawa.guarantee.security.response.TokenResponse;
 import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.service.UserService;
 import com.nagakawa.guarantee.service.mapper.UserMapper;
 import com.nagakawa.guarantee.util.Constants;
+import com.nagakawa.guarantee.util.Validator;
 
+import liquibase.pro.packaged.iF;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -40,7 +45,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserJWTController {
-	private final JwtTokenProvider jwtTokenUtil;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -49,30 +54,34 @@ public class UserJWTController {
 	private final UserMapper userMapper;
 
 	@PostMapping("/authenticate")
-	public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginRequest loginRequest) {
-		Optional<User> optionalUser = this.userService.findByUsername(loginRequest.getUsername().trim());
+    public ResponseEntity<TokenResponse> authorize(@Valid @RequestBody LoginRequest loginRequest) {
+        Optional<User> optionalUser = this.userService.findByUsername(loginRequest.getUsername().trim());
 
-		if (!optionalUser.isPresent() || Constants.EntityStatus.ACTIVE != optionalUser.get().getStatus()) {
-			throw new BadCredentialsException("Bad credentials");
-		}
+        if (!optionalUser.isPresent() || Constants.EntityStatus.ACTIVE != optionalUser.get().getStatus()) {
+            new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
+        }
 
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-				loginRequest.getUsername().trim(), loginRequest.getPassword().trim());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername().trim(), loginRequest.getPassword().trim());
 
-		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		boolean rememberMe = (loginRequest.getRememberMe() == null) ? false : loginRequest.getRememberMe();
+        boolean rememberMe = (loginRequest.getRememberMe() == null) ? false : loginRequest.getRememberMe();
 
-		String jwt = jwtTokenUtil.createToken(authentication, rememberMe);
+        String accessToken = jwtTokenProvider.createAccessToken(authentication, rememberMe);
 
-		HttpHeaders httpHeaders = new HttpHeaders();
+        String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
 
-		httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, SecurityConstants.Jwt.TOKEN_START + jwt);
+        HttpHeaders httpHeaders = new HttpHeaders();
 
-		return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
-	}
+        httpHeaders.add(SecurityConstants.Jwt.AUTHORIZATION_HEADER, SecurityConstants.Jwt.TOKEN_START + accessToken);
+
+        return new ResponseEntity<>(new TokenResponse(accessToken, refreshToken, SecurityConstants.Jwt.TOKEN_START.trim()),
+                httpHeaders, HttpStatus.OK);
+    }
 	
 	@GetMapping("/authenticate")
     public String isAuthenticated(HttpServletRequest request) {
@@ -80,9 +89,31 @@ public class UserJWTController {
     }
 	
 	@GetMapping("/account")
-	public UserDTO getAccount() {
-		return userService.getUserWithRoles().map(this.userMapper::toDto)
-				.orElseThrow(() -> new BadRequestAlertException("User could not be found", User.class.getSimpleName(),
-						"error.user-could-not-be-found"));
+    public UserDTO getAccount() {
+        return userService.getUserWithRoles().map(this.userMapper::toDto).orElseThrow(
+                () -> new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_USER_COULD_NOT_BE_FOUND),
+                        User.class.getSimpleName(), LabelKey.ERROR_USER_COULD_NOT_BE_FOUND));
+    }
+	
+	@GetMapping("/logout")
+	public ResponseEntity<Boolean> logout(HttpServletRequest request) {
+	    jwtTokenProvider.invalidateToken();
+	    
+	    return ResponseEntity.ok().build();
 	}
+	
+    @PostMapping("/refresh-token")
+    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest refreshRequest,
+            HttpServletRequest request) {
+        String refreshToken = refreshRequest.getRefreshToken();
+
+        String username = refreshRequest.getUsername();
+
+        return jwtTokenProvider.refreshToken(username, refreshToken)
+                .map(accessToken -> new ResponseEntity<TokenResponse>(
+                        new TokenResponse(accessToken, refreshToken, SecurityConstants.Jwt.TOKEN_START.trim()),
+                        HttpStatus.OK))
+                .orElseThrow(() -> new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_REFRESH_TOKEN),
+                        User.class.getSimpleName(), LabelKey.ERROR_INVALID_REFRESH_TOKEN));
+    }
 }

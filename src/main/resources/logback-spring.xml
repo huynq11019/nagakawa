@@ -9,7 +9,7 @@
 
     <property name="LOG_ROOT"            value="${CATALINA_BASE:-.}"/>
     <property name="LOG_PATH"            value="${LOG_ROOT}/logs"/>
-    <property name="LOG_ARCHIVE_PREFIX"  value="${LOG_PATH}/covidtest-%d{yyyy-MM-dd}-"/>
+    <property name="LOG_ARCHIVE_PREFIX"  value="${LOG_PATH}/nagakawa-%d{yyyy-MM-dd}-"/>
     <property name="LOG_ARCHIVE_DAYS"    value="5"/>
     <property name="LOG_TEMP" value="${LOG_ROOT}/logs"/>
 

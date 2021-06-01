@@ -19,9 +19,6 @@ import com.nagakawa.guarantee.security.util.SecurityConstants;
  * found.
  */
 public class JWTFilter extends OncePerRequestFilter {
-
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-
     private final JwtTokenProvider jwtTokenProvider;
 
     public JWTFilter(JwtTokenProvider jwtTokenProvider) {
@@ -44,7 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        String bearerToken = request.getHeader(SecurityConstants.Jwt.AUTHORIZATION_HEADER);
         
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.Jwt.TOKEN_START)) {
             return bearerToken.substring(SecurityConstants.Jwt.TOKEN_START.length());

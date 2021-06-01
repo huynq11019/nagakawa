@@ -1,4 +1,4 @@
-package com.nagakawa.guarantee.security.config;
+package com.nagakawa.guarantee.security.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final JwtTokenProvider jwtTokenUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private final CorsFilter corsFilter;
     
@@ -37,35 +37,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			"/app/**/*.{js,html}",
             "/i18n/**",
             "/content/**",
-            "/swagger-ui/index.html",
             "/test/**"
 	};
 	
 	private static final String[] PUBLIC_URLS = {
 			"/api/authenticate",
 			"/api/authenticate/**",
-			"/api/oauth2/ybi/callback",
+			"/api/refresh-token",
 			"/api/register",
-			"/api/users",
-			"/api/activate",
-			"/api/account/reset-password/init",
-			"/api/account/reset-password/finish",
-			"/api/file/**",
-			"/api/public/**",
-			"/api/payment/**",
-			"/fake_api/**",
-			"/api/nodes/findAll",
-			"/api/health-facilities/*"
+			"/api/activate"
 	};
 	
 	private static final String[] PUBLIC_POST_URLS = {
-			"/api/doctor-appointments",
-			"/api/transactions"
+
 	};
 	
 	private static final String[] PUBLIC_GET_URLS = {
-			"/api/health-facilities/{id}",
-			"/api/health-facilities/*"
+
 	};
 	
 	private static final String[] AUTHENTICATED_URLS = {
@@ -97,32 +85,32 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(problemSupport)
                 .accessDeniedHandler(problemSupport)
                 .and()
-                .headers()
-                .contentSecurityPolicy("default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:")
+                    .headers()
+                    .contentSecurityPolicy("default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:")
                 .and()
-                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                    .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
                 .and()
-                .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
+                    .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
                 .and()
-                .frameOptions()
-                .deny()
+                    .frameOptions()
+                    .deny()
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests()
-                .antMatchers(PUBLIC_URLS).permitAll()
-                .antMatchers(HttpMethod.POST, PUBLIC_POST_URLS).permitAll()
-                .antMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
-                .antMatchers(AUTHENTICATED_URLS).authenticated()
+                    .authorizeRequests()
+                    .antMatchers(PUBLIC_URLS).permitAll()
+                    .antMatchers(HttpMethod.POST, PUBLIC_POST_URLS).permitAll()
+                    .antMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
+                    .antMatchers(AUTHENTICATED_URLS).authenticated()
                 .and()
-                .httpBasic()
+                    .httpBasic()
                 .and()
-                .apply(securityConfigurerAdapter());
+                    .apply(securityConfigurerAdapter());
         // @formatter:on
     }
 
     private JWTConfigurer securityConfigurerAdapter() {
-        return new JWTConfigurer(jwtTokenUtil);
+        return new JWTConfigurer(jwtTokenProvider);
     }
 }

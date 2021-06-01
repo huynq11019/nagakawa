@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2012 Viettel Telecom. All rights reserved.
- * VIETTEL PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (C) 2012 Evotek Telecom. All rights reserved.
+ * Evotek PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 package com.nagakawa.guarantee.util;
 

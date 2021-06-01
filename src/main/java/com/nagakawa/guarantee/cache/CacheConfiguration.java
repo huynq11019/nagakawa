@@ -65,7 +65,7 @@ public class CacheConfiguration implements DisposableBean {
         // In development, remove multicast auto-configuration
         System.setProperty("hazelcast.local.localAddress", properties.getLocalIp());
         
-        if (env.acceptsProfiles(Profiles.of(EnvConstants.SPRING_PROFILE_DEVELOPMENT))) {
+        if (env.acceptsProfiles(Profiles.of(EnvConstants.Profile.DEVELOPMENT))) {
 //            System.setProperty("hazelcast.local.localAddress", properties.getIp());
             config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
             config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);

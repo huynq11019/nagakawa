@@ -1,13 +1,10 @@
 package com.nagakawa.guarantee.model;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -27,8 +24,5 @@ public class Privilege implements Serializable {
 
 	@Column(length = 255)
 	private String description;
-//	
-//	@ManyToMany(mappedBy = "privileges")
-//	private Set<Role> roles = new HashSet<>();
 
 }

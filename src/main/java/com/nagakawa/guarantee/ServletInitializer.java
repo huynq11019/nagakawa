@@ -55,7 +55,7 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD,
                 DispatcherType.ASYNC);
         
-        if (env.acceptsProfiles(Profiles.of(EnvConstants.SPRING_PROFILE_PRODUCTION))) {
+        if (env.acceptsProfiles(Profiles.of(EnvConstants.Profile.PRODUCTION))) {
             initCachingHttpHeadersFilter(servletContext, disps);
         }
         
@@ -65,6 +65,7 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
 	@PostConstruct
     public void connection() {
         try {
+            //check if redis server is available
         	redisTemplate.getConnectionFactory().getConnection();
         } catch (Exception e) {
             System.out.println("-------------------------------------------------------------------------------------------");
@@ -79,6 +80,7 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
      */
 	private void initCachingHttpHeadersFilter(ServletContext servletContext, EnumSet<DispatcherType> disps) {
 		_log.info("Registering Caching HTTP Headers Filter");
+		
 		FilterRegistration.Dynamic cachingHttpHeadersFilter = servletContext.addFilter("cachingHttpHeadersFilter",
 				new CachingHttpHeadersFilter());
 

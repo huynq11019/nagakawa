@@ -65,10 +65,15 @@ spring:
       starttls.enable: true
       ssl.trust: smtp.gmail.com
   messages:
-    cache-duration: PT1S # 1 second, see the ISO 8601 standard
-    basename: i18n/messages
-    encoding: UTF-8
-
+    encoding: 'UTF-8'
+    use-code-as-default-message: true
+    basename: i18n/labels
+    cache-duration: 60    # 60 second, see the ISO 8601 standard
+  redis:
+    host: 'localhost'
+    port: 6379
+    password: 12345678aA@
+    timeout: 60000
 
 server:
   port: 8080
@@ -86,18 +91,21 @@ security:
     allowed-origins: '*'
     allowed-methods: '*'
     allowed-headers: '*'
-    exposed-headers: 'Authorization,Link,X-Total-Count,X-Total-Active-Count,X-Action-Allow,X-Action-Mesage,X-Action-Alert,X-Action-Params,X-Action-Error'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-Action-Mesage,X-Action-Params'
     allow-credentials: true
     max-age: 1800
   authentication:
     jwt:
       # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
       base64-secret: 'LNRP5b4+y9LUC3oV9WuGIf4GYT8GDYVIlHCYhywX3edfVKMrahN842YmCEVo2OX8Rs2G/eoGgKy/+/PvhT1Q4Id9pBMYdjcwJP6OyTcSUnO/tw65I/CwtYQy6uzJ+DBVkAwLoh+yPCvJym7lbVipcaD7me1BiDLp0NCfNYaetRzOxOxFcA4E67lpIHrPsb97C/SuiQL+cre7UXfFHJZxGR1tOM2IKQytUe0Q11rkPRggVTvIOfTRPeBAhvhjRLxPxpxy3Xe8LAUpdthKtKf7yFUHL+jqpwQ9cvILCLuH9sRVn6szBTrrvxMsmY79o2o8ZiGIeuDMBt4ahVdvavWt6g=='
-      # Token is valid 24 hours
-      token-validity-in-seconds: 86400
+      # Token is valid 1 day
+      token-duration: 1
       # Token is valid 30 days
-      token-validity-in-seconds-for-remember-me: 2592000
-
+      token-remember-me-duration: 30
+      #refresh token duration (days)
+      refesh-token-duration: 30
+      #other data duration (minute)
+      data-duration: 5 
 application:
   folderUpload: 'E:\\FILE_BKLK\\Storage'
   template: 'excel_template'
@@ -111,7 +119,16 @@ cache:
     enabled: false
     update-interval: 3
     url: http://192.168.2.100:8180/hazelcast-mancenter
-
+task:
+  execution:
+    pool:
+      schedule:
+        max-size : 5
+        allow-core-thread-timeout : true
+        core-size : 10
+        keep-alive : 60
+        queue-capacity : 100
+        name : 'qlns-schedule-threadpool-'
 #  * "0 0 * * * *" = the top of every hour of every day.
 #  * "*/10 * * * * *" = every ten seconds.
 #  * "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.
@@ -119,6 +136,5 @@ cache:
 #  * "0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.
 #  * "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
 #  * "0 0 0 25 12 ?" = every Christmas Day at midnight
-scheduling:
-  system-notification:
-    time-cron: '0 0 0 * * *'
+cron:
+  expired-token-cleaner: '0 0 0/1 * * *'

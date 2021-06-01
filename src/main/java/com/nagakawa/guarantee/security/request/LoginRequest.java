@@ -1,4 +1,4 @@
-package com.nagakawa.guarantee.api.request;
+package com.nagakawa.guarantee.security.request;
 
 import javax.validation.constraints.NotNull;
 
