@@ -27,6 +27,8 @@ import org.springframework.util.StringUtils;
 
 import com.nagakawa.guarantee.api.exception.BadRequestAlertException;
 import com.nagakawa.guarantee.configuration.AuthenticationProperties;
+import com.nagakawa.guarantee.messages.LabelKey;
+import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.AccessToken;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.redis.service.RedisService;
@@ -110,6 +112,7 @@ public class JwtTokenProvider implements InitializingBean {
                 .token(jwt)
                 .expiredDate(duration.toInstant())
                 .expired(false)
+                .username(username)
                 .build();
         
         accessTokenRepository.save(accessToken);
@@ -127,10 +130,10 @@ public class JwtTokenProvider implements InitializingBean {
 					.collect(Collectors.joining(","));
 
 			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
-		} catch (UsernameNotFoundException e) {
-			throw new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
-					"error.invalid-user-or-password");
-		}
+        } catch (UsernameNotFoundException e) {
+            throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
+        }
 	}
     
 	public String createAccessToken(Authentication authentication, boolean rememberMe) {
@@ -150,8 +153,8 @@ public class JwtTokenProvider implements InitializingBean {
 
 			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
 		} catch (UsernameNotFoundException e) {
-			throw new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
-					"error.invalid-user-or-password");
+		    throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
 		}
 	}
 
@@ -194,9 +197,10 @@ public class JwtTokenProvider implements InitializingBean {
 			principal = (UserPrincipal) ob;
 
 			//kiểm tra lại hashset
-			if (!hashKey.equals(principal.getHashKey())) {
-				throw new BadRequestAlertException("Invalid token", User.class.getSimpleName(), "error.invalid-token");
-			}
+            if (!hashKey.equals(principal.getHashKey())) {
+                throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_TOKEN),
+                        User.class.getSimpleName(), LabelKey.ERROR_INVALID_TOKEN);
+            }
 		} else {
 			principal = (UserPrincipal) userDetailsService.loadUserByUsername(username);
 

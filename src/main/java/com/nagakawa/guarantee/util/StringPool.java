@@ -62,6 +62,7 @@ public class StringPool {
 	public static final String ISO_8859_1 = "ISO-8859-1";
 	public static final String LESS_THAN = "<";
 	public static final String LESS_THAN_OR_EQUAL = "<=";
+	public static final String LOCALHOST = "localhost";
 	public static final String LIKE = "LIKE";
 	public static final String LT = "&lt;";
 	public static final String MINUS = "-";

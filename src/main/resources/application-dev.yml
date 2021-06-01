@@ -65,9 +65,10 @@ spring:
       starttls.enable: true
       ssl.trust: smtp.gmail.com
   messages:
-    cache-duration: PT1S # 1 second, see the ISO 8601 standard
-    basename: i18n/messages
-    encoding: UTF-8
+    encoding: 'UTF-8'
+    use-code-as-default-message: true
+    basename: i18n/labels
+    cache-duration: 60    # 60 second, see the ISO 8601 standard
   redis:
     host: 'localhost'
     port: 6379
@@ -90,7 +91,7 @@ security:
     allowed-origins: '*'
     allowed-methods: '*'
     allowed-headers: '*'
-    exposed-headers: 'Authorization,Link,X-Total-Count,X-Total-Active-Count,X-Action-Allow,X-Action-Mesage,X-Action-Alert,X-Action-Params,X-Action-Error'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-Action-Mesage,X-Action-Params'
     allow-credentials: true
     max-age: 1800
   authentication:
@@ -136,4 +137,4 @@ task:
 #  * "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
 #  * "0 0 0 25 12 ?" = every Christmas Day at midnight
 cron:
-  expired-token-cleaner: '0/5 * * * * *'
+  expired-token-cleaner: '0 0 0/1 * * *'

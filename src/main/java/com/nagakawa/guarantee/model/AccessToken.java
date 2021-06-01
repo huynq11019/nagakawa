@@ -47,5 +47,6 @@ public class AccessToken extends AbstractAuditingEntity implements Serializable{
     @Column(name = "expired", length = 1)
     private boolean expired;
     
-    
+    @Column(length = 50, unique = true, nullable = false)
+    private String username;
 }

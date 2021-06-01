@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nagakawa.guarantee.api.exception.BadRequestAlertException;
+import com.nagakawa.guarantee.messages.LabelKey;
+import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.dto.UserDTO;
 import com.nagakawa.guarantee.security.jwt.JWTFilter;
@@ -56,8 +58,8 @@ public class UserJWTController {
         Optional<User> optionalUser = this.userService.findByUsername(loginRequest.getUsername().trim());
 
         if (!optionalUser.isPresent() || Constants.EntityStatus.ACTIVE != optionalUser.get().getStatus()) {
-        	new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
-                    "error.invalid-user-or-password");
+            new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -87,11 +89,11 @@ public class UserJWTController {
     }
 	
 	@GetMapping("/account")
-	public UserDTO getAccount() {
-		return userService.getUserWithRoles().map(this.userMapper::toDto)
-				.orElseThrow(() -> new BadRequestAlertException("User could not be found", User.class.getSimpleName(),
-						"error.user-could-not-be-found"));
-	}
+    public UserDTO getAccount() {
+        return userService.getUserWithRoles().map(this.userMapper::toDto).orElseThrow(
+                () -> new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_USER_COULD_NOT_BE_FOUND),
+                        User.class.getSimpleName(), LabelKey.ERROR_USER_COULD_NOT_BE_FOUND));
+    }
 	
 	@GetMapping("/logout")
 	public ResponseEntity<Boolean> logout(HttpServletRequest request) {
@@ -111,7 +113,7 @@ public class UserJWTController {
                 .map(accessToken -> new ResponseEntity<TokenResponse>(
                         new TokenResponse(accessToken, refreshToken, SecurityConstants.Jwt.TOKEN_START.trim()),
                         HttpStatus.OK))
-                .orElseThrow(() -> new BadRequestAlertException("Invalid refresh token", User.class.getSimpleName(),
-                        "error.invalid-refresh-token"));
+                .orElseThrow(() -> new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_REFRESH_TOKEN),
+                        User.class.getSimpleName(), LabelKey.ERROR_INVALID_REFRESH_TOKEN));
     }
 }

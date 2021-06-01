@@ -28,7 +28,7 @@ public final class DefaultProfileUtil {
          * This cannot be set in the application.yml file.
          * See https://github.com/spring-projects/spring-boot/issues/1219
          */
-        defProperties.put(SPRING_PROFILE_DEFAULT, EnvConstants.SPRING_PROFILE_DEVELOPMENT);
+        defProperties.put(SPRING_PROFILE_DEFAULT, EnvConstants.Profile.DEVELOPMENT);
         app.setDefaultProperties(defProperties);
     }
 }
