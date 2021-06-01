@@ -10,22 +10,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 01/06/2021 - LinhLH: Create new
  *
  * @author LinhLH
  */
+@Slf4j
 @Component
 public class Labels {
-
-    private static final Logger _log = LoggerFactory.getLogger(Labels.class);
     /** The Constant US. */
     public static final Locale US = Locale.US;
 

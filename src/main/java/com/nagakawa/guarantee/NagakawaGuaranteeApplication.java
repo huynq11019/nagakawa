@@ -5,8 +5,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -21,12 +19,12 @@ import com.nagakawa.guarantee.messages.LabelKey;
 import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.util.StringPool;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @SpringBootApplication
 @EnableConfigurationProperties
 public class NagakawaGuaranteeApplication implements InitializingBean {
-
-    private static final Logger _log = LoggerFactory.getLogger(NagakawaGuaranteeApplication.class);
-
     @Autowired
     private Environment env;
 

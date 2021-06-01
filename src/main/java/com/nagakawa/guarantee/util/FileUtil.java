@@ -18,8 +18,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,16 +30,15 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author linhlh2
  */
+@Slf4j
 public class FileUtil {
-
-	private static final Logger _log = LogManager.getLogger(FileUtil.class);
 	public static final String DOC = "doc";
 	public static final String DOCX = "docx";
 	public final static Map<String, String> FILE_TYPE_MAP = new HashMap<String, String>() {

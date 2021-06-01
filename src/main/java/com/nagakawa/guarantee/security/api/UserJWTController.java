@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,7 +23,6 @@ import com.nagakawa.guarantee.messages.LabelKey;
 import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.dto.UserDTO;
-import com.nagakawa.guarantee.security.jwt.JWTFilter;
 import com.nagakawa.guarantee.security.jwt.JwtTokenProvider;
 import com.nagakawa.guarantee.security.request.LoginRequest;
 import com.nagakawa.guarantee.security.request.TokenRefreshRequest;
@@ -33,9 +31,7 @@ import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.service.UserService;
 import com.nagakawa.guarantee.service.mapper.UserMapper;
 import com.nagakawa.guarantee.util.Constants;
-import com.nagakawa.guarantee.util.Validator;
 
-import liquibase.pro.packaged.iF;
 import lombok.RequiredArgsConstructor;
 
 /**
