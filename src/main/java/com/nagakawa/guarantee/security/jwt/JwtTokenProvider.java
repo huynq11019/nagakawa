@@ -20,13 +20,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import com.nagakawa.guarantee.api.exception.BadRequestAlertException;
 import com.nagakawa.guarantee.configuration.AuthenticationProperties;
 import com.nagakawa.guarantee.model.AccessToken;
+import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.redis.service.RedisService;
 import com.nagakawa.guarantee.repository.AccessTokenRepository;
 import com.nagakawa.guarantee.security.UserPrincipal;
@@ -86,32 +88,27 @@ public class JwtTokenProvider implements InitializingBean {
 
     // access token
 
-    public String createAccessToken(String username) {
-        UserDetails principal = userDetailsService.loadUserByUsername(username);
-        
-        String hashKey = getHashKey(username);
-        
-        ((UserPrincipal) principal).setHashKey(hashKey);
-        
-        redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, principal);
-        
-        Date validity = DateUtils.getDateAfter(new Date(), properties.getTokenDuration());
-        
-        String authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-        
-        String jwt = Jwts.builder()
+    public String createAccessToken(UserPrincipal userPrincipal, String username, String authorities, Date duration) {
+    	String hashKey = getHashKey(username);
+    	
+    	userPrincipal.setHashKey(hashKey);
+    	
+    	//lưu userPrincipal vào redis, thời gian lưu đc cấu hình
+		redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, userPrincipal,
+				properties.getDataDuration(), TimeUnit.MINUTES);
+    	
+    	String jwt = Jwts.builder()
                 .setSubject(username)
                 .claim(SecurityConstants.Jwt.PRIVILEGES, authorities)
                 .claim(SecurityConstants.Jwt.HASHKEY, hashKey)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setIssuedAt(new Date())
-                .setExpiration(validity).compact();
-
-        // save token to db
+                .setExpiration(duration).compact();
+    	
+    	// save token to db
         AccessToken accessToken = AccessToken.builder()
                 .token(jwt)
-                .expiredDate(validity.toInstant())
+                .expiredDate(duration.toInstant())
                 .expired(false)
                 .build();
         
@@ -120,45 +117,43 @@ public class JwtTokenProvider implements InitializingBean {
         return jwt;
     }
     
-    public String createAccessToken(Authentication authentication, boolean rememberMe) {
-        String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+	public String createAccessToken(String username) {
+		try {
+			UserDetails principal = userDetailsService.loadUserByUsername(username);
 
-        String username = authentication.getName();
+			Date validity = DateUtils.getDateAfter(new Date(), properties.getTokenDuration());
 
-        Object ob = authentication.getPrincipal();
+			String authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+					.collect(Collectors.joining(","));
 
-        UserDetails principal = ob instanceof UserPrincipal ? (UserPrincipal) ob
-                : userDetailsService.loadUserByUsername(username);
+			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
+		} catch (UsernameNotFoundException e) {
+			throw new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
+					"error.invalid-user-or-password");
+		}
+	}
+    
+	public String createAccessToken(Authentication authentication, boolean rememberMe) {
+		try {
+			String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+					.collect(Collectors.joining(","));
 
-        String hashKey = getHashKey(username);
+			String username = authentication.getName();
 
-        ((UserPrincipal) principal).setHashKey(hashKey);
-        // store UserDetails in redis
-        redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, principal);
+			Object ob = authentication.getPrincipal();
 
-        Date validity = DateUtils.getDateAfter(new Date(),
-                (rememberMe ? properties.getTokenDuration() : properties.getTokenRememberMeDuration()));
+			UserDetails principal = ob instanceof UserPrincipal ? (UserPrincipal) ob
+					: userDetailsService.loadUserByUsername(username);
 
-        String jwt = Jwts.builder()
-                .setSubject(username)
-                .claim(SecurityConstants.Jwt.PRIVILEGES, authorities)
-                .claim(SecurityConstants.Jwt.HASHKEY, hashKey)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setIssuedAt(new Date())
-                .setExpiration(validity).compact();
+			Date validity = DateUtils.getDateAfter(new Date(),
+					(rememberMe ? properties.getTokenDuration() : properties.getTokenRememberMeDuration()));
 
-        // save token to db
-        AccessToken accessToken = AccessToken.builder()
-                .token(jwt)
-                .expiredDate(validity.toInstant())
-                .expired(false)
-                .build();
-        
-        accessTokenRepository.save(accessToken);
-
-        return jwt;
-    }
+			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
+		} catch (UsernameNotFoundException e) {
+			throw new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
+					"error.invalid-user-or-password");
+		}
+	}
 
     /*
      * Create refresh token
@@ -178,30 +173,43 @@ public class JwtTokenProvider implements InitializingBean {
         return refreshToken;
     }
     
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+	public Authentication getAuthentication(String token) {
+		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 
-        Collection<? extends GrantedAuthority> authorities = Arrays
-                .stream(claims.get(SecurityConstants.Jwt.PRIVILEGES).toString().split(","))
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+		Collection<? extends GrantedAuthority> authorities = Arrays
+				.stream(claims.get(SecurityConstants.Jwt.PRIVILEGES).toString().split(","))
+				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        String username = claims.getSubject();
+		String username = claims.getSubject();
 
-        String hashKey = claims.get(SecurityConstants.Jwt.HASHKEY).toString();
+		String hashKey = claims.get(SecurityConstants.Jwt.HASHKEY).toString();
 
-        // retrieve UserDetails from redis
-        Object ob = redisService.hget(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL);
+		// retrieve UserDetails from redis
+		// nếu không có ob thì tạo mới và lưu lại
+		Object ob = redisService.hget(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL);
 
-        UserDetails principal = null;
+		UserPrincipal principal = null;
 
-        if (ob instanceof UserPrincipal) {
-            principal = (UserPrincipal) ob;
+		if (Validator.isNotNull(ob) && (ob instanceof UserPrincipal)) {
+			principal = (UserPrincipal) ob;
 
-            ((UserPrincipal) principal).setHashKey(hashKey);
-        }
+			//kiểm tra lại hashset
+			if (!hashKey.equals(principal.getHashKey())) {
+				throw new BadRequestAlertException("Invalid token", User.class.getSimpleName(), "error.invalid-token");
+			}
+		} else {
+			principal = (UserPrincipal) userDetailsService.loadUserByUsername(username);
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
-    }
+			principal.setHashKey(hashKey);
+
+			redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, principal,
+					properties.getDataDuration(), TimeUnit.MINUTES);
+		}
+
+		//test thử ném ra exception
+
+		return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+	}
 
     public boolean validateToken(String authToken) {
         String username = StringPool.BLANK;

@@ -32,20 +32,3 @@ spring:
     enabled: false
   firebase:
     fcm-account-service: firebase/fcm.json
-  redis:
-    host: 'localhost'
-    port: 6379
-    password: 12345678aA@
-    timeout: 60000
-task:
-  execution:
-    pool:
-      schedule:
-        max-size : 5
-        allow-core-thread-timeout : true
-        core-size : 10
-        keep-alive : 60
-        queue-capacity : 100
-        name : 'qlns-schedule-threadpool-'
-cron:
-  expired-token-cleaner: '0 0/5 * * * ?'

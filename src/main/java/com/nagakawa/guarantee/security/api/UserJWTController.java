@@ -56,7 +56,8 @@ public class UserJWTController {
         Optional<User> optionalUser = this.userService.findByUsername(loginRequest.getUsername().trim());
 
         if (!optionalUser.isPresent() || Constants.EntityStatus.ACTIVE != optionalUser.get().getStatus()) {
-            throw new BadCredentialsException("Bad credentials");
+        	new BadRequestAlertException("Invalid username or password", User.class.getSimpleName(),
+                    "error.invalid-user-or-password");
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

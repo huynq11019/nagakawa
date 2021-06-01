@@ -68,7 +68,11 @@ spring:
     cache-duration: PT1S # 1 second, see the ISO 8601 standard
     basename: i18n/messages
     encoding: UTF-8
-
+  redis:
+    host: 'localhost'
+    port: 6379
+    password: 12345678aA@
+    timeout: 60000
 
 server:
   port: 8080
@@ -114,7 +118,16 @@ cache:
     enabled: false
     update-interval: 3
     url: http://192.168.2.100:8180/hazelcast-mancenter
-
+task:
+  execution:
+    pool:
+      schedule:
+        max-size : 5
+        allow-core-thread-timeout : true
+        core-size : 10
+        keep-alive : 60
+        queue-capacity : 100
+        name : 'qlns-schedule-threadpool-'
 #  * "0 0 * * * *" = the top of every hour of every day.
 #  * "*/10 * * * * *" = every ten seconds.
 #  * "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.
@@ -122,6 +135,5 @@ cache:
 #  * "0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.
 #  * "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
 #  * "0 0 0 25 12 ?" = every Christmas Day at midnight
-scheduling:
-  system-notification:
-    time-cron: '0 0 0 * * *'
+cron:
+  expired-token-cleaner: '0/5 * * * * *'
