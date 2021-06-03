@@ -17,18 +17,18 @@ import com.nagakawa.guarantee.repository.AccessTokenRepository;
 import com.nagakawa.guarantee.service.AccessTokenService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 31/05/2021 - LinhLH: Create new
  *
  * @author LinhLH
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AccessTokenServiceImpl implements AccessTokenService {
-    private final static Logger _log = LoggerFactory.getLogger(AccessTokenServiceImpl.class);
-    
+public class AccessTokenServiceImpl implements AccessTokenService {    
     private final AccessTokenRepository accessTokenRepository;
 
     @Override

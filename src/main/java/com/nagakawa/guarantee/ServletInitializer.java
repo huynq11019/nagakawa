@@ -9,8 +9,6 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -28,13 +26,12 @@ import com.nagakawa.guarantee.configuration.AuthenticationProperties;
 import com.nagakawa.guarantee.configuration.EnvConstants;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class ServletInitializer extends SpringBootServletInitializer implements ServletContextInitializer {
-
-	private static final Logger _log = LoggerFactory.getLogger(ServletInitializer.class);
-	
+public class ServletInitializer extends SpringBootServletInitializer implements ServletContextInitializer {	
 	private final AuthenticationProperties ap;
     
     private final Environment env;

@@ -19,9 +19,9 @@ import com.nagakawa.guarantee.security.util.SecurityConstants;
  * found.
  */
 public class JWTFilter extends OncePerRequestFilter {
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTTokenProvider jwtTokenProvider;
 
-    public JWTFilter(JwtTokenProvider jwtTokenProvider) {
+    public JWTFilter(JWTTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 

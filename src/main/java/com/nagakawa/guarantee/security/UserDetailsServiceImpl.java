@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,19 +25,20 @@ import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.UserLogin;
 import com.nagakawa.guarantee.repository.UserLoginRepository;
 import com.nagakawa.guarantee.repository.UserRepository;
+import com.nagakawa.guarantee.security.exception.UserNotActivatedException;
 import com.nagakawa.guarantee.util.Constants;
 import com.nagakawa.guarantee.util.Validator;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Authenticate a user from the database.
  */
+@Slf4j
 @Component("userDetailsService")
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-	private final Logger _log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
-
 	private final UserRepository userRepository;
 
 	private final UserLoginRepository userLoginRepository;

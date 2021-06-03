@@ -11,8 +11,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,13 +49,12 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider implements InitializingBean {
-
-    private static final Logger _log = LoggerFactory.getLogger(JwtTokenProvider.class);
-
+public class JWTTokenProvider implements InitializingBean {
     private Key key;
 
     private final AuthenticationProperties properties;
@@ -90,7 +87,7 @@ public class JwtTokenProvider implements InitializingBean {
 
     // access token
 
-    public String createAccessToken(UserPrincipal userPrincipal, String username, String authorities, Date duration) {
+    public JWTToken createAccessToken(UserPrincipal userPrincipal, String username, String authorities, Date duration) {
     	String hashKey = getHashKey(username);
     	
     	userPrincipal.setHashKey(hashKey);
@@ -117,10 +114,10 @@ public class JwtTokenProvider implements InitializingBean {
         
         accessTokenRepository.save(accessToken);
 
-        return jwt;
+        return new JWTToken(jwt, duration.toInstant());
     }
     
-	public String createAccessToken(String username) {
+	public JWTToken createAccessToken(String username) {
 		try {
 			UserDetails principal = userDetailsService.loadUserByUsername(username);
 
@@ -136,7 +133,7 @@ public class JwtTokenProvider implements InitializingBean {
         }
 	}
     
-	public String createAccessToken(Authentication authentication, boolean rememberMe) {
+	public JWTToken createAccessToken(Authentication authentication, boolean rememberMe) {
 		try {
 			String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 					.collect(Collectors.joining(","));
@@ -162,7 +159,7 @@ public class JwtTokenProvider implements InitializingBean {
      * Create refresh token
      */
     
-    public String createRefreshToken(Authentication authentication) {
+    public JWTToken createRefreshToken(Authentication authentication) {
         String username = authentication.getName();
         
         String refreshToken = HMACUtil.hashSha256(UUID.randomUUID().toString() + username);
@@ -173,7 +170,8 @@ public class JwtTokenProvider implements InitializingBean {
         redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.REFRESH_TOKEN, refreshToken,
                 properties.getRefeshTokenDuration(), TimeUnit.DAYS);
         
-        return refreshToken;
+        return new JWTToken(refreshToken,
+                DateUtils.getDateAfter(new Date(), properties.getRefeshTokenDuration()).toInstant());
     }
     
 	public Authentication getAuthentication(String token) {
@@ -269,7 +267,7 @@ public class JwtTokenProvider implements InitializingBean {
         }
     }
 
-    public Optional<String> refreshToken(String username, String refreshToken) {
+    public Optional<JWTToken> refreshToken(String username, String refreshToken) {
         String hashKey = getHashKey(username);
 
         return Optional

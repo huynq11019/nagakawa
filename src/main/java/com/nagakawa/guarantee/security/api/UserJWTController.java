@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,8 +23,8 @@ import com.nagakawa.guarantee.messages.LabelKey;
 import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.model.dto.UserDTO;
-import com.nagakawa.guarantee.security.jwt.JWTFilter;
-import com.nagakawa.guarantee.security.jwt.JwtTokenProvider;
+import com.nagakawa.guarantee.security.jwt.JWTToken;
+import com.nagakawa.guarantee.security.jwt.JWTTokenProvider;
 import com.nagakawa.guarantee.security.request.LoginRequest;
 import com.nagakawa.guarantee.security.request.TokenRefreshRequest;
 import com.nagakawa.guarantee.security.response.TokenResponse;
@@ -33,9 +32,7 @@ import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.service.UserService;
 import com.nagakawa.guarantee.service.mapper.UserMapper;
 import com.nagakawa.guarantee.util.Constants;
-import com.nagakawa.guarantee.util.Validator;
 
-import liquibase.pro.packaged.iF;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -45,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserJWTController {
-	private final JwtTokenProvider jwtTokenProvider;
+	private final JWTTokenProvider jwtTokenProvider;
 
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -71,16 +68,23 @@ public class UserJWTController {
 
         boolean rememberMe = (loginRequest.getRememberMe() == null) ? false : loginRequest.getRememberMe();
 
-        String accessToken = jwtTokenProvider.createAccessToken(authentication, rememberMe);
+        JWTToken accessToken = jwtTokenProvider.createAccessToken(authentication, rememberMe);
 
-        String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
+        JWTToken refreshToken = jwtTokenProvider.createRefreshToken(authentication);
 
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.add(SecurityConstants.Jwt.AUTHORIZATION_HEADER, SecurityConstants.Jwt.TOKEN_START + accessToken);
 
-        return new ResponseEntity<>(new TokenResponse(accessToken, refreshToken, SecurityConstants.Jwt.TOKEN_START.trim()),
-                httpHeaders, HttpStatus.OK);
+        TokenResponse tokenResponse = TokenResponse.builder()
+                .tokenType(SecurityConstants.Jwt.TOKEN_START.trim())
+                .accessToken(accessToken.getToken())
+                .accessTokenExpiredAt(accessToken.getExpiredTime())
+                .refreshToken(refreshToken.getToken())
+                .refreshTokenExpiredAt(refreshToken.getExpiredTime())
+                .build();
+        
+        return new ResponseEntity<>(tokenResponse, httpHeaders, HttpStatus.OK);
     }
 	
 	@GetMapping("/authenticate")
@@ -108,11 +112,16 @@ public class UserJWTController {
         String refreshToken = refreshRequest.getRefreshToken();
 
         String username = refreshRequest.getUsername();
-
+        
         return jwtTokenProvider.refreshToken(username, refreshToken)
                 .map(accessToken -> new ResponseEntity<TokenResponse>(
-                        new TokenResponse(accessToken, refreshToken, SecurityConstants.Jwt.TOKEN_START.trim()),
-                        HttpStatus.OK))
+                        TokenResponse.builder()
+                            .tokenType(SecurityConstants.Jwt.TOKEN_START.trim())
+                            .accessToken(accessToken.getToken())
+                            .accessTokenExpiredAt(accessToken.getExpiredTime())
+                            .refreshToken(refreshToken)
+                            .build(), HttpStatus.OK)
+                        )
                 .orElseThrow(() -> new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_REFRESH_TOKEN),
                         User.class.getSimpleName(), LabelKey.ERROR_INVALID_REFRESH_TOKEN));
     }

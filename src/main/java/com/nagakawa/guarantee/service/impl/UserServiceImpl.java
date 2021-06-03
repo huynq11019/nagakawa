@@ -16,13 +16,13 @@ import com.nagakawa.guarantee.service.mapper.UserMapper;
 import com.nagakawa.guarantee.util.Constants;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-	private final static Logger _log = LoggerFactory.getLogger(UserService.class);
-
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;

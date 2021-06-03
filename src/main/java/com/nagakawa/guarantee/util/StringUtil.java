@@ -1,9 +1,3 @@
-/*
- * StringUtil.java
- *
- * Copyright (C) 2021 by Vinsmart. All right reserved.
- * This software is the confidential and proprietary information of Vinsmart
- */
 package com.nagakawa.guarantee.util;
 
 import java.io.BufferedReader;
@@ -20,13 +14,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class StringUtil.
+import lombok.extern.slf4j.Slf4j;
+
+/*
+ * LinhLH
  */
+
+@Slf4j
 public class StringUtil {
 
     /** The empty string array. */
@@ -35,10 +30,6 @@ public class StringUtil {
     /** The Constant _HEX_DIGITS. */
     private static final char[] _HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
             'e', 'f' };
-
-    /** The log. */
-    private static Logger _log = LogManager.getLogger(StringUtil.class);
-
     /**
      * Highlight.
      *

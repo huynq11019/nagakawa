@@ -1,4 +1,4 @@
-package com.nagakawa.guarantee.security;
+package com.nagakawa.guarantee.security.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

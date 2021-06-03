@@ -10,21 +10,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.nagakawa.guarantee.repository.extend.AccessTokenRepositoryExtend;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 31/05/2021 - LinhLH: Create new
  *
  * @author LinhLH
  */
+@Slf4j
 public class AccessTokenRepositoryImpl implements AccessTokenRepositoryExtend {
     @PersistenceContext
     private EntityManager entityManager;
-
-    private final Logger _log = LoggerFactory.getLogger(AccessTokenRepositoryImpl.class);
 
     @Override
     public int expiredTokenByUsername(String username) {
