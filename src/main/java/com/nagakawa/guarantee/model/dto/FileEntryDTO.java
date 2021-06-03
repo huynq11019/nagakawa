@@ -5,14 +5,19 @@ package com.nagakawa.guarantee.model.dto;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Set;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author LinhLH
  *
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FileEntryDTO implements Serializable {
 	private static final long serialVersionUID = 2105312206084619913L;
 

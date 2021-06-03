@@ -57,4 +57,5 @@ Khi pull code mới về, chạy lệnh dưới để đồng bộ Database
 ```
 mvn liquibase:update
 ```
-
+## Spring fox
+Trên môi trường development truy cập địa chỉ http://localhost:8080/swagger-ui/ để truy xuất thông tin của tất cả các api bao gồm url, method, request và response body.

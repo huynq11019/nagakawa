@@ -109,7 +109,9 @@ cache:
     enabled: false
     update-interval: 3
     url: http://192.168.2.100:8180/hazelcast-mancenter
-
+springfox:
+  documentation:
+    enabled: false #disable spring fox on production mode
 scheduling:
   system-notification:
     time-cron: '0 0 0 * * *'
