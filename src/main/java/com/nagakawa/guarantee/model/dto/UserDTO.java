@@ -6,10 +6,11 @@ import java.util.Set;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.nagakawa.guarantee.util.Constants;
 
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(Include.NON_NULL)
 public class UserDTO implements Serializable {
 
 	private static final long serialVersionUID = 2890692332776709259L;
@@ -44,7 +46,7 @@ public class UserDTO implements Serializable {
 	@Size(min = 6, max = 20, message = "Mật khẩu phải có độ dài từ 6 đến 20 ký tự")
 	private String password;
 	
-	private Instant date_of_birth;
+	private Instant dateOfBirth;
 	
 	@Email(regexp = Constants.Regex.EMAIL, message = "Nhập email đúng định dạng")
     @Size(min = 5, max = 254)
