@@ -6,6 +6,10 @@
  */
 package com.nagakawa.guarantee.dto.jackson;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
@@ -21,10 +25,6 @@ import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.nagakawa.guarantee.model.dto.UserDTO;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 
 /**
  * 05/06/2021 - LinhLH: Create new

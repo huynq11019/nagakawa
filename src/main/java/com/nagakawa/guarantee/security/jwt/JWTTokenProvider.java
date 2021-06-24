@@ -30,11 +30,11 @@ import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.AccessToken;
 import com.nagakawa.guarantee.model.User;
 import com.nagakawa.guarantee.redis.service.RedisService;
-import com.nagakawa.guarantee.repository.AccessTokenRepository;
 import com.nagakawa.guarantee.security.UserPrincipal;
 import com.nagakawa.guarantee.security.exception.InvalidTokenRequestException;
 import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.security.util.SecurityUtils;
+import com.nagakawa.guarantee.service.AccessTokenService;
 import com.nagakawa.guarantee.util.DateUtils;
 import com.nagakawa.guarantee.util.HMACUtil;
 import com.nagakawa.guarantee.util.StringPool;
@@ -63,7 +63,7 @@ public class JWTTokenProvider implements InitializingBean {
 
     private final RedisService redisService;
 
-    private final AccessTokenRepository accessTokenRepository;
+    private final AccessTokenService accessTokenService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -110,9 +110,10 @@ public class JWTTokenProvider implements InitializingBean {
                 .expiredDate(duration.toInstant())
                 .expired(false)
                 .username(username)
+                .userId(userPrincipal.getUser().getId())
                 .build();
         
-        accessTokenRepository.save(accessToken);
+        accessTokenService.create(accessToken);
 
         return new JWTToken(jwt, duration.toInstant());
     }
@@ -259,7 +260,7 @@ public class JWTTokenProvider implements InitializingBean {
             redisService.hdelete(getRedisKey(username, hashKey));
 
             // invalidate all token belong to username in db
-            int result = accessTokenRepository.expiredTokenByUsername(username);
+            int result = accessTokenService.expiredTokenByUsername(username);
 
             if (_log.isDebugEnabled()) {
                 _log.debug("{} token(s) expired", result);
@@ -278,7 +279,7 @@ public class JWTTokenProvider implements InitializingBean {
     }
     
     private boolean isTokenInBlackList(String username, String token) {
-        Optional<AccessToken> accessToken = accessTokenRepository.findById(token);
+        Optional<AccessToken> accessToken = accessTokenService.findById(token);
 
         if (Validator.isNull(username) || !accessToken.isPresent()) {
             return true;
