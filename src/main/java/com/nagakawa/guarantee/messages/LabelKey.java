@@ -14,17 +14,23 @@ package com.nagakawa.guarantee.messages;
 public interface LabelKey {
     public static final String ERROR_CONCURRENCY_FAILURE = "error.concurrency-failure";
     
+    public static final String ERROR_CONSTRAINT_VIOLATION = "error.constraint-violation";
+    
     public static final String ERROR_INVALID_REFRESH_TOKEN = "error.invalid-refresh-token";
     
     public static final String ERROR_INVALID_TOKEN = "error.invalid-token";
     
     public static final String ERROR_INVALID_USER_OR_PASSWORD = "error.invalid-user-or-password";
-    
-    public static final String ERROR_USER_COULD_NOT_BE_FOUND = "error.user-could-not-be-found";
 
     public static final String ERROR_METHOD_ARGUMENT_NOT_VALID = "error.method-argument-not-valid";
 
+    public static final String ERROR_USER_COULD_NOT_BE_FOUND = "error.user-could-not-be-found";
+
+    public static final String ERROR_INVALID_USERNAME = "error.invalid-username";
+    
+    public static final String ERROR_INVALID_USERNAME_OR_PASSWORD = "error.invalid-username-or-password";
+
     public static final String SERVER_STARTED = "server.started";
 
-    public static final String ERROR_CONSTRAINT_VIOLATION = "error.constraint-violation";
+    public static final String LOGIN_SUCCESSFUL = "login.successful";
 }

@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +33,10 @@ public class UserLogin implements Serializable{
 	@Column(name = "success", length = 1)
 	private Boolean success;
 	
-	@Column(name = "user_name", length = 75)
+	@Column(name = "username", length = 75)
 	private String username;
+	
+	@Column(name = "description", length = 255)
+	private String description;
 	
 }
