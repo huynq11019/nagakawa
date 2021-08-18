@@ -16,6 +16,8 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 import org.springframework.web.filter.CorsFilter;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
+import com.nagakawa.guarantee.security.handler.AuthenticationFailureHandlerImpl;
+import com.nagakawa.guarantee.security.handler.AuthenticationSuccessHandlerImpl;
 import com.nagakawa.guarantee.security.jwt.JWTConfigurer;
 import com.nagakawa.guarantee.security.jwt.JWTTokenProvider;
 
@@ -32,6 +34,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final CorsFilter corsFilter;
     
     private final SecurityProblemSupport problemSupport;
+    
+    private final AuthenticationFailureHandlerImpl authenticationFailureHandler;
+    
+    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
 	
 	private static final String[] IGNOR_URLS = {
 			"/app/**/*.{js,html}",
@@ -106,7 +112,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                     .httpBasic()
                 .and()
-                    .apply(securityConfigurerAdapter());
+                    .apply(securityConfigurerAdapter())
+                .and()    
+                    .formLogin().disable()
+                    .httpBasic().disable()
+                    .logout().disable();
+//                
         // @formatter:on
     }
 

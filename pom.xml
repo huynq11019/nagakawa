@@ -20,6 +20,7 @@
         <!--DO NOT EDIT THIS 2 LINES -->
         <build.time>${maven.build.timestamp}</build.time>
         <maven.build.timestamp.format>yyyy_MM_dd_HH_mm</maven.build.timestamp.format>
+        <skipTests>true</skipTests>
         <!--ADD YOUR CUSTOM PROPERTIES HERE -->
         <maven.version>3.3.9</maven.version>
         <java.version>1.8</java.version>
@@ -31,8 +32,7 @@
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
-        <liquibase-maven-plugin.version>4.2.2</liquibase-maven-plugin.version>
-        <liquibase-hibernate5.version>4.2.2</liquibase-hibernate5.version>
+        <liquibase.version>4.2.2</liquibase.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <itextpdf.version>5.5.10</itextpdf.version>
         <problem-spring-web.version>0.23.0</problem-spring-web.version>
@@ -70,11 +70,17 @@
         <dependency>
             <groupId>org.liquibase.ext</groupId>
             <artifactId>liquibase-hibernate5</artifactId>
-            <version>${liquibase-hibernate5.version}</version>
+            <version>${liquibase.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -342,6 +348,13 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>${java.version}</source>
@@ -375,7 +388,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase-maven-plugin.version}</version>
+                <version>${liquibase.version}</version>
                 <configuration>
                     <propertyFile>src/main/resources/liquibase.properties</propertyFile>
                     <diffChangeLogFile>src/main/resources/db/changelog/${build.time}.xml</diffChangeLogFile>
@@ -385,7 +398,7 @@
                     <dependency>
                         <groupId>org.liquibase.ext</groupId>
                         <artifactId>liquibase-hibernate5</artifactId>
-                        <version>${liquibase-hibernate5.version}</version>
+                        <version>${liquibase.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.springframework.boot</groupId>

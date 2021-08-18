@@ -7,12 +7,12 @@
 package com.nagakawa.guarantee.service.impl;
 
 import java.time.Instant;
+import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nagakawa.guarantee.model.AccessToken;
 import com.nagakawa.guarantee.repository.AccessTokenRepository;
 import com.nagakawa.guarantee.service.AccessTokenService;
 
@@ -34,5 +34,24 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     @Override
     public long deleteAllExpired() {
         return accessTokenRepository.deleteByExpiredDateLessThanEqualOrExpired(Instant.now(), true);
+    }
+
+    @Override
+    public int expiredTokenByUsername(String username) {
+        return accessTokenRepository.expiredTokenByUsername(username);
+    }
+
+    @Override
+    public Optional<AccessToken> findById(String token) {
+        return accessTokenRepository.findById(token);
+    }
+
+    @Override
+    public AccessToken create(AccessToken accessToken) {
+        //invalidate all token by username
+        this.expiredTokenByUsername(accessToken.getUsername());
+        
+        //save new token
+        return accessTokenRepository.save(accessToken);
     }
 }

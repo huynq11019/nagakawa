@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import com.nagakawa.guarantee.messages.LabelKey;
+import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.Privilege;
 import com.nagakawa.guarantee.model.Role;
 import com.nagakawa.guarantee.model.User;
@@ -27,7 +31,6 @@ import com.nagakawa.guarantee.repository.UserLoginRepository;
 import com.nagakawa.guarantee.repository.UserRepository;
 import com.nagakawa.guarantee.security.exception.UserNotActivatedException;
 import com.nagakawa.guarantee.util.Constants;
-import com.nagakawa.guarantee.util.Validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +63,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			if (user == null) {
 				this.saveLoginFailure(username);
 
-				throw new UsernameNotFoundException("User not exist with name :" + username);
+				_log.error("User not exist with name :" + username);
+				
+				return null;
+				//throw new UsernameNotFoundException("User not exist with name :" + username);
 			}
 
 		} catch (Exception e) {
@@ -103,21 +109,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return userPrincipal;
 	}
 	
-	private void saveLoginFailure(String username) {
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-				.getRequest();
+    private void saveLoginFailure(String username) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
 
-		String ip = request.getRemoteAddr();
+        String ip = request.getRemoteAddr();
 
-		if (Validator.isIPAddress(ip)) {
-			UserLogin loginLog = UserLogin.builder()
-					.username(username)
-					.ip(ip)
-					.loginTime(Instant.now())
-					.success(false)
-					.build();
+        UserLogin loginLog = UserLogin.builder().username(username)//
+                .ip(ip)//
+                .loginTime(Instant.now())//
+                .success(false)//
+                .description(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME))//
+                .build();
 
-			this.userLoginRepository.save(loginLog);
-		}
-	}
+        this.userLoginRepository.save(loginLog);
+
+    }
 }

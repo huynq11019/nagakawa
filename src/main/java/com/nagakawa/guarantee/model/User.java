@@ -36,7 +36,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 @Entity
-@Table(name = "users")
+@Table(name = "user_")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @NamedEntityGraph(name = "roles", attributeNodes = @NamedAttributeNode("roles"))
 public class User extends AbstractAuditingEntity implements Serializable {
