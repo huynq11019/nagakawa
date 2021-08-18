@@ -67,6 +67,11 @@ spring:
     use-code-as-default-message: true
     basename: i18n/labels
     cache-duration: 60    # 60 second, see the ISO 8601 standard
+  redis:
+    host: 'localhost'
+    port: 6379
+    password:
+    timeout: 60000
   thymeleaf:
     cache: false
   social:
@@ -91,11 +96,16 @@ security:
   authentication:
     jwt:
       # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
-      base64-secret: uNiJbAZAoIoTfmyDCRmaITPfDC7Ax0+et0NcBqH3IGw+RDYDTbfKG+9pWAUa9QIAn1EJSHDKu+mzNI1ZQiYLr8CDhBbGWwWYQD28YSfOWl5jrkqf6LwM+r9aFY4g9bej8COz47YCSM3/YWOEmRKsBrWaNaJS+KB0qFC+oKGZVauU0mBSlNxYsOfiO1lrYlT1m/CnmvxDLfkIr/Qw3APcvt30gybfFl8j+eXC00I5pl1z+NWN1y1/8eFBe0l3QUCOmGk0arw5bgpwWJlZVaFrSKMYXizbJQ0wQ40gSRhkewov6rsAixmAij4MjRZ136jckYmqsPC5rT14zJn6aExyoQ==
+      base64-secret: 'LNRP5b4+y9LUC3oV9WuGIf4GYT8GDYVIlHCYhywX3edfVKMrahN842YmCEVo2OX8Rs2G/eoGgKy/+/PvhT1Q4Id9pBMYdjcwJP6OyTcSUnO/tw65I/CwtYQy6uzJ+DBVkAwLoh+yPCvJym7lbVipcaD7me1BiDLp0NCfNYaetRzOxOxFcA4E67lpIHrPsb97C/SuiQL+cre7UXfFHJZxGR1tOM2IKQytUe0Q11rkPRggVTvIOfTRPeBAhvhjRLxPxpxy3Xe8LAUpdthKtKf7yFUHL+jqpwQ9cvILCLuH9sRVn6szBTrrvxMsmY79o2o8ZiGIeuDMBt4ahVdvavWt6g=='
       # Token is valid 24 hours
-      token-validity-in-seconds: 86400
-      token-validity-in-seconds-for-remember-me: 2592000
-
+      token-duration: 1
+      # Token is valid 30 days
+      token-remember-me-duration: 30
+      #refresh token duration (days)
+      refesh-token-duration: 30
+      #other data duration (minute)
+      data-duration: 5 
+      
 application:
   folderUpload: /u01/jenkins/workspace/web_upload
   template: 'excel_template'
@@ -115,7 +125,27 @@ springfox:
 scheduling:
   system-notification:
     time-cron: '0 0 0 * * *'
-
+task:
+  execution:
+    pool:
+      schedule:
+        max-size : 5
+        allow-core-thread-timeout : true
+        core-size : 10
+        keep-alive : 60
+        queue-capacity : 100
+        name : 'qlns-schedule-threadpool-'
+#  * "0 0 * * * *" = the top of every hour of every day.
+#  * "*/10 * * * * *" = every ten seconds.
+#  * "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.
+#  * "0 0 8,10 * * *" = 8 and 10 o'clock of every day.
+#  * "0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.
+#  * "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
+#  * "0 0 0 25 12 ?" = every Christmas Day at midnight
+cron:
+  expired-token-cleaner: '0 0 0/1 * * *'
+  
+  
 google-map:
   api-key: "AIzaSyClHasepzubogG3tATPPskYH7b5p5FY1tI"
   url-geocode: "https://maps.googleapis.com/maps/api/geocode/json"
