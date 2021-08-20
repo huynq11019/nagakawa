@@ -25,12 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.imageio.ImageIO;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -285,6 +282,18 @@ public class FileUtil {
 		sb.append(type);
 		sb.append(";base64,");
 		sb.append(getImageBase64String(blob, type));
+
+		return sb.toString();
+	}
+	
+	public static String getImageSrcBase64String(BufferedImage image, String type) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("data:image");
+		sb.append(StringPool.SLASH);
+		sb.append(type);
+		sb.append(";base64,");
+		sb.append(encodeToString(image, type));
 
 		return sb.toString();
 	}

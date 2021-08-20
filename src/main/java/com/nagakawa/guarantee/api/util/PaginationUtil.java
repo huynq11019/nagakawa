@@ -1,11 +1,9 @@
 package com.nagakawa.guarantee.api.util;
 
 import java.text.MessageFormat;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import com.nagakawa.guarantee.util.StringPool;
 import com.nagakawa.guarantee.util.URLEncodePool;
 

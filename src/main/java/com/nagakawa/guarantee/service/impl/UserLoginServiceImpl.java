@@ -6,6 +6,7 @@
  */
 package com.nagakawa.guarantee.service.impl;
 
+import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,4 +35,13 @@ public class UserLoginServiceImpl implements UserLoginService {
         return userLoginRepository.save(loginLog);
     }
 
+    @Override
+	public void saveUserLogin(String username, String ip, boolean success, String description) {
+		UserLogin loginLog = UserLogin.builder()//
+				.username(username).ip(ip).loginTime(Instant.now()).success(success).description(description).build();
+
+		userLoginRepository.save(loginLog);
+		
+		//
+	}
 }

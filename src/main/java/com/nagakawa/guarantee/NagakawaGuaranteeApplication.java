@@ -4,25 +4,24 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
-
 import com.nagakawa.guarantee.configuration.DefaultProfileUtil;
 import com.nagakawa.guarantee.configuration.EnvConstants;
 import com.nagakawa.guarantee.messages.LabelKey;
 import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.util.StringPool;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootApplication
+//@ComponentScan(basePackages = "com.nagakawa.*")
 @EnableConfigurationProperties
 public class NagakawaGuaranteeApplication implements InitializingBean {
     @Autowired
@@ -71,7 +70,7 @@ public class NagakawaGuaranteeApplication implements InitializingBean {
 
                 serverPort, contextPath, env.getActiveProfiles());
 
-        _log.info(Labels.getLabels(LabelKey.SERVER_STARTED));
+        _log.info(Labels.getLabels(LabelKey.MESSAGE_SERVER_HAS_BEEN_STARTED));
     }
 
     @Override

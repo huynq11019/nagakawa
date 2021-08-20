@@ -19,4 +19,6 @@ public interface UserLoginService {
      * @param loginLog
      */
     UserLogin save(UserLogin loginLog);
+    
+    void saveUserLogin(String username, String ip, boolean success, String description);
 }

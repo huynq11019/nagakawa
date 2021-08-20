@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +36,10 @@ public class DateUtils {
     public final static long DAY_MS = HOUR_MS * 24;
 
     public final static String NORM_DATE_PATTERN = "yyyy-MM-dd";
+    
+    public final static String NORM_DATE_PATTERN_FLAT = "yyyyMMdd";
+    
+    public final static String NORM_DATE_PATTERN_FLAT_LONG = "yyyyMMddHHmmss";
 
     public final static String NORM_2_DATE_PATTERN = "yyyy/MM/dd";
 
@@ -127,10 +130,6 @@ public class DateUtils {
         return formattedDate;
     }
 
-    private static LocalDateTime dateToLocalDateTime(Date date) {
-        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-    }
-
     public static long diff(Date subtrahend, Date minuend, long diffField) {
         long diff = minuend.getTime() - subtrahend.getTime();
         return diff / diffField;
@@ -159,32 +158,12 @@ public class DateUtils {
 		}
 	}
 
-    private static String findDayOfWeek(DayOfWeek dayOfWeek) {
-		if (Calendar.MONDAY == dayOfWeek.getValue()) {
-			return "Thứ 2";
-		} else if (Calendar.TUESDAY == dayOfWeek.getValue()) {
-			return "Thứ 3";
-		} else if (Calendar.WEDNESDAY == dayOfWeek.getValue()) {
-			return "Thứ 4";
-		} else if (Calendar.THURSDAY == dayOfWeek.getValue()) {
-			return "Thứ 5";
-		} else if (Calendar.FRIDAY == dayOfWeek.getValue()) {
-			return "Thứ 6";
-		} else if (Calendar.SATURDAY == dayOfWeek.getValue()) {
-			return "Thứ 7";
-		} else if (Calendar.SUNDAY == dayOfWeek.getValue()) {
-			return "Chủ nhật";
-		} else {
-			return StringPool.BLANK;
-		}
-	}
-
     public static String format(Date date, String format) {
-        return new SimpleDateFormat(format).format(date);
+        return Validator.isNotNull(date) ? new SimpleDateFormat(format).format(date) : null;
     }
 
     public static String formatDate(Date date) {
-        return new SimpleDateFormat(NORM_DATE_PATTERN).format(date);
+        return Validator.isNotNull(date) ? new SimpleDateFormat(NORM_DATE_PATTERN).format(date) : null;
     }
 
     public static Date formatDateDate(Date date) {
@@ -203,15 +182,19 @@ public class DateUtils {
 
 	}
 
+    public static String formatDateFlat(Date date) {
+		return Validator.isNotNull(date) ? new SimpleDateFormat(NORM_DATE_PATTERN_FLAT).format(date) : null;
+    }
+    
+    public static String formatDateFlatLong(Date date) {
+		return Validator.isNotNull(date) ? new SimpleDateFormat(NORM_DATE_PATTERN_FLAT_LONG).format(date) : null;
+    }
+    
     public static String formatDateString(Date date) {
-		if (date != null) {
-			SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");
-			return formater.format(date);
-		} else {
-			return "";
-		}
+        SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");
 
-	}
+        return Validator.isNotNull(date) ? formater.format(date) : StringPool.BLANK;
+    }
 
     public static String formatDateTime(Date date) {
         return new SimpleDateFormat(NORM_DATETIME_PATTERN).format(date);
@@ -531,7 +514,7 @@ public class DateUtils {
         return null;
     }
 
-	public static Instant getTimeStart(String dateText) {
+    public static Instant getTimeStart(String dateText) {
         try {
             LocalDateTime date = LocalDateTime.parse(dateText + " 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             return date.toInstant(ZoneOffset.ofHours(+7));
@@ -543,8 +526,8 @@ public class DateUtils {
     public static DateFormat getUTCFormat() {
 		return getUTCFormat(StringPool.BLANK);
 	}
-    
-    public static DateFormat getUTCFormat(String text) {
+
+	public static DateFormat getUTCFormat(String text) {
 		String pattern = StringPool.BLANK;
 
 		if (text.length() == 8) {
@@ -564,27 +547,16 @@ public class DateUtils {
 		return DateFormatFactoryUtil.getSimpleDateFormat(pattern);
 	}
 
-	public static ZoneId getZoneHCM() {
+    public static ZoneId getZoneHCM() {
         return ZoneId.of("Asia/Ho_Chi_Minh");
     }
-
-	public static Date lastMouth() {
+    
+    public static Date lastMouth() {
         return offsiteDate(new Date(), Calendar.MONTH, -1);
     }
 
 	public static Date lastWeek() {
         return offsiteDate(new Date(), Calendar.WEEK_OF_YEAR, -1);
-    }
-
-	private static Date localDateTimeToDate(LocalDateTime localDateTime) {
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
-
-	private static String modifyAddLeadingZeros(int number) {
-        if (number > 9) {
-            return String.valueOf(number);
-        }
-        return "0" + number;
     }
 
 	public static Date newDate() {
@@ -738,5 +710,40 @@ public class DateUtils {
 
 	public static Date yesterday() {
         return offsiteDate(new Date(), Calendar.DAY_OF_YEAR, -1);
+    }
+
+	private static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+	private static String findDayOfWeek(DayOfWeek dayOfWeek) {
+		if (Calendar.MONDAY == dayOfWeek.getValue()) {
+			return "Thứ 2";
+		} else if (Calendar.TUESDAY == dayOfWeek.getValue()) {
+			return "Thứ 3";
+		} else if (Calendar.WEDNESDAY == dayOfWeek.getValue()) {
+			return "Thứ 4";
+		} else if (Calendar.THURSDAY == dayOfWeek.getValue()) {
+			return "Thứ 5";
+		} else if (Calendar.FRIDAY == dayOfWeek.getValue()) {
+			return "Thứ 6";
+		} else if (Calendar.SATURDAY == dayOfWeek.getValue()) {
+			return "Thứ 7";
+		} else if (Calendar.SUNDAY == dayOfWeek.getValue()) {
+			return "Chủ nhật";
+		} else {
+			return StringPool.BLANK;
+		}
+	}
+
+	private static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+	private static String modifyAddLeadingZeros(int number) {
+        if (number > 9) {
+            return String.valueOf(number);
+        }
+        return "0" + number;
     }
 }

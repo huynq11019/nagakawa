@@ -7,6 +7,7 @@ package com.nagakawa.guarantee.util;
 import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -1503,6 +1504,21 @@ public class ArrayUtil {
 		return set.toArray(new String[set.size()]);
 	}
 
+	/**
+	 * Tìm kích thước lớn nhất của List mảng
+	 * @param arrayList
+	 * @return
+	 */
+	
+	public static <T> int getMaxLength(List<T[]> arrayList) {
+		List<Integer> lengths = new ArrayList<>();
+
+		for (T[] array : arrayList) {
+			lengths.add(getLength(array));
+		}
+
+		return Collections.max(lengths);
+	}
 	/**
 	 * Hàm lấy độ dài mảng
 	 * 

@@ -1,16 +1,18 @@
 package com.nagakawa.guarantee.util;
 
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-
+import java.util.Date;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
+import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -175,17 +177,6 @@ public class HMACUtil {
 	}
 
 	/**
-	 * The main method.
-	 *
-	 * @param args the arguments
-	 */
-	public static void main(String[] args) {
-		String text = "hello";
-
-		System.out.println(hash(text, SHA256));
-	}
-
-	/**
 	 * Sha 256 hex.
 	 *
 	 * @param messages the messages
@@ -196,5 +187,26 @@ public class HMACUtil {
 		String joinMessage = StringUtil.join(messages, sparator);
 
 		return DigestUtils.sha256Hex(joinMessage);
+	}
+
+
+	public static String generateHS256Token(String appKey, String appSecret, long tokenExpire) {
+		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+		
+		String base64Key = DatatypeConverter.printBase64Binary(appSecret.getBytes());
+		
+		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(base64Key);
+		
+		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+		
+		long JWT_EXPIRATION = tokenExpire;
+		
+		Date now = new Date();
+		
+		return Jwts.builder()
+				.claim("iss", appKey)
+				.claim("exp", now.getTime() + JWT_EXPIRATION)
+				.signWith(signingKey, signatureAlgorithm)
+				.compact();
 	}
 }

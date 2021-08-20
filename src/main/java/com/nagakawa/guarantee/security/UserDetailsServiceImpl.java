@@ -1,37 +1,20 @@
 package com.nagakawa.guarantee.security;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import com.nagakawa.guarantee.messages.LabelKey;
-import com.nagakawa.guarantee.messages.Labels;
 import com.nagakawa.guarantee.model.Privilege;
 import com.nagakawa.guarantee.model.Role;
 import com.nagakawa.guarantee.model.User;
-import com.nagakawa.guarantee.model.UserLogin;
-import com.nagakawa.guarantee.repository.UserLoginRepository;
 import com.nagakawa.guarantee.repository.UserRepository;
 import com.nagakawa.guarantee.security.exception.UserNotActivatedException;
 import com.nagakawa.guarantee.util.Constants;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserDetailsServiceImpl implements UserDetailsService {
 	private final UserRepository userRepository;
 
-	private final UserLoginRepository userLoginRepository;
-
 	@Override
-	@Transactional
 	public UserDetails loadUserByUsername(final String username) {
 		_log.info("Authenticating {}", username);
 
@@ -61,12 +41,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 							.orElse(null);
 
 			if (user == null) {
-				this.saveLoginFailure(username);
-
 				_log.error("User not exist with name :" + username);
 				
 				return null;
-				//throw new UsernameNotFoundException("User not exist with name :" + username);
 			}
 
 		} catch (Exception e) {
@@ -75,7 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 		// Create the UserDetails object for a specified user with
 		// their grantedAuthorities List.
-		final UserDetails userDetails = createSpringSecurityUser(username, user);
+		final UserDetails userDetails = this.createSpringSecurityUser(username, user);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Rights for '" + user.getUsername() + "' (ID: " + user.getId() + ") evaluated. [" + this + "]");
@@ -83,46 +60,34 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 		return userDetails;
 	}
-
-	private UserPrincipal createSpringSecurityUser(String username, User user) {
-		if (user.getStatus() != Constants.EntityStatus.ACTIVE) {
-			throw new UserNotActivatedException("User " + username + " was not activated");
-		}
-
-		Set<Role> roles = user.getRoles();
-
-		List<String> roleNames = new ArrayList<>();
-
-		List<Privilege> privileges = new ArrayList<>();
-
-		roles.forEach((role) -> {
-			roleNames.add(role.getName());
-
-			privileges.addAll(role.getPrivileges());
-		});
-
-		List<GrantedAuthority> grantedAuthorities = privileges.stream()
-				.map(privilege -> new SimpleGrantedAuthority(privilege.getName())).collect(Collectors.toList());
-
-		final UserPrincipal userPrincipal = new UserPrincipal(user, roleNames, grantedAuthorities);
-
-		return userPrincipal;
-	}
 	
-    private void saveLoginFailure(String username) {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
+	private UserPrincipal createSpringSecurityUser(String username, User user) {
+        if (user.getStatus() != Constants.EntityStatus.ACTIVE) {
+            throw new UserNotActivatedException("User " + username + " was not activated");
+        }
 
-        String ip = request.getRemoteAddr();
+        List<Role> roles = user.getRoles();
 
-        UserLogin loginLog = UserLogin.builder().username(username)//
-                .ip(ip)//
-                .loginTime(Instant.now())//
-                .success(false)//
-                .description(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME))//
-                .build();
+        List<String> roleNames = new ArrayList<>();
 
-        this.userLoginRepository.save(loginLog);
+        List<Privilege> privileges = new ArrayList<>();
 
+        roles.forEach((role) -> {
+            if (role.getStatus() == Constants.EntityStatus.ACTIVE) {
+                roleNames.add(role.getName());
+
+                privileges.addAll(role.getPrivileges());
+            }
+        });
+
+        List<GrantedAuthority> grantedAuthorities = privileges.stream()
+                .map(privilege -> new SimpleGrantedAuthority(privilege.getName())).collect(Collectors.toList());
+
+        // add role name to authority list
+        roleNames.stream().forEach(roleName -> grantedAuthorities.add(new SimpleGrantedAuthority(roleName)));
+
+        final UserPrincipal userPrincipal = new UserPrincipal(user, roleNames, grantedAuthorities);
+
+        return userPrincipal;
     }
 }

@@ -3,10 +3,10 @@ package com.nagakawa.guarantee.api.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 public final class HeaderUtil {
 
@@ -31,7 +31,7 @@ public final class HeaderUtil {
     public static HttpHeaders createAlert(String message, String param) {
         HttpHeaders headers = new HttpHeaders();
         
-        headers.add(ApiConstants.HttpHeaders.X_ACTION_MESAGE, message);
+        headers.add(ApiConstants.HttpHeaders.X_ACTION_MESSAGE, message);
 
         try {
             headers.add(ApiConstants.HttpHeaders.X_ACTION_PARAMS,
@@ -138,9 +138,23 @@ public final class HeaderUtil {
 
         HttpHeaders headers = new HttpHeaders();
 
-        headers.add(ApiConstants.HttpHeaders.X_ACTION_MESAGE, message);
+        headers.add(ApiConstants.HttpHeaders.X_ACTION_MESSAGE, message);
         headers.add(ApiConstants.HttpHeaders.X_ACTION_PARAMS, entityName);
 
         return headers;
+    }
+    
+    public static HttpHeaders getAcceptJsonHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        
+        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        
+        headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+        
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        return headers; 
     }
 }

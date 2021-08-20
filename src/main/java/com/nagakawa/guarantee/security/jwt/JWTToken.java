@@ -6,8 +6,6 @@
  */
 package com.nagakawa.guarantee.security.jwt;
 
-import java.time.Instant;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -21,5 +19,5 @@ import lombok.Data;
 public class JWTToken {
     private String token;
     
-    private Instant expiredTime;
+    private int duration;
 }

@@ -3,9 +3,7 @@ package com.nagakawa.guarantee.configuration;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Getter;
 
 

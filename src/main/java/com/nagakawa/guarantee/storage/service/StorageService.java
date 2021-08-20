@@ -4,29 +4,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
 
-    String store(MultipartFile file);
+	void addStoreKey(String key, String data);
 
-    Path load(String filename);
+	InputStreamResource download(String filename);
 
-    Resource loadAsResource(String filename);
+	String getDataStore(String key);
 
-    Stream<Path> loadAll();
+	InputStream getExcelTemplateFromResource(String filename) throws IOException;
 
-    String store(MultipartFile filePart, String destName);
+	String getTempDirectory();
 
-    Resource loadAsResourceFolder(String filename);
+	String getTimeStampFileName(String original);
+	
+	void invalidateStoreKey(String key);
 
-    Path loadFolder(String filename);
+	Path load(String filename);
 
-    InputStreamResource download(String filename);
+	Stream<Path> loadAll();
 
-    InputStream downloadExcelTemplateFromResource(String filename) throws IOException;
+	Resource loadAsResource(String filename);
 
+	Resource loadAsResourceFolder(String filename);
+
+	Path loadFolder(String filename);
+
+	String store(MultipartFile file);
+
+	String store(MultipartFile filePart, String destName);
+	
+	void validateOwner(String key);
 }
