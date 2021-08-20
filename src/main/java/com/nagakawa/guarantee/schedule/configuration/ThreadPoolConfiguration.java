@@ -39,7 +39,7 @@ public class ThreadPoolConfiguration {
     @Value("${task.execution.pool.schedule.name}")
     private String threadName;
 
-    @Bean("qlnsScheduleExecutor")
+    @Bean("nagakawaScheduleExecutor")
     public Executor messageQueueExecutor() {
         return threadPoolTaskExecutor(maxPoolSize, maxPoolSize, queueCapacity, keepAliveSeconds, allowCoreThreadTimeOut,
                 threadName);

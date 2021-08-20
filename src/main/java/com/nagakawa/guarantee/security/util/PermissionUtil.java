@@ -6,9 +6,7 @@
 package com.nagakawa.guarantee.security.util;
 
 import java.util.Collection;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import com.nagakawa.guarantee.model.Role;
 
 /**
@@ -32,6 +30,6 @@ public class PermissionUtil {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(PermissionUtil.encodePassword("123456a@"));
+		System.err.println(PermissionUtil.encodePassword("12345678aA@"));
 	}
 }

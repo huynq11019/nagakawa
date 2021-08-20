@@ -10,8 +10,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
+import javax.servlet.http.Cookie;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,28 +22,29 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.nagakawa.guarantee.api.exception.BadRequestAlertException;
-import com.nagakawa.guarantee.configuration.AuthenticationProperties;
 import com.nagakawa.guarantee.messages.LabelKey;
 import com.nagakawa.guarantee.messages.Labels;
-import com.nagakawa.guarantee.model.AccessToken;
 import com.nagakawa.guarantee.model.User;
-import com.nagakawa.guarantee.redis.service.RedisService;
+import com.nagakawa.guarantee.security.RsaProvider;
 import com.nagakawa.guarantee.security.UserPrincipal;
+import com.nagakawa.guarantee.security.configuration.AuthenticationProperties;
 import com.nagakawa.guarantee.security.exception.InvalidTokenRequestException;
 import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.security.util.SecurityUtils;
-import com.nagakawa.guarantee.service.AccessTokenService;
 import com.nagakawa.guarantee.util.DateUtils;
+import com.nagakawa.guarantee.util.GetterUtil;
 import com.nagakawa.guarantee.util.HMACUtil;
 import com.nagakawa.guarantee.util.StringPool;
+import com.nagakawa.guarantee.util.StringUtil;
 import com.nagakawa.guarantee.util.Validator;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -61,79 +64,67 @@ public class JWTTokenProvider implements InitializingBean {
 
     private final UserDetailsService userDetailsService;
 
-    private final RedisService redisService;
+    private final RsaProvider rsaProvider;
 
-    private final AccessTokenService accessTokenService;
+    private LoadingCache<String, String> attemptsCache;
+    
+    private JwtParser jwtParser;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        byte[] keyBytes;
+	public void afterPropertiesSet() throws Exception {
+		byte[] keyBytes;
 
-        String secret = properties.getBase64Secret();
+		String secret = properties.getBase64Secret();
 
-        if (StringUtils.isEmpty(secret)) {
-            _log.warn("Warning: the JWT key used is not Base64-encoded. "
-                    + "We recommend using the `spring.security.authentication.jwt.base64-secret` key for optimum security.");
+		if (StringUtils.isEmpty(secret)) {
+			_log.warn("Warning: the JWT key used is not Base64-encoded. "
+					+ "We recommend using the `spring.security.authentication.jwt.base64-secret` key for optimum security.");
 
-            keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        } else {
-            _log.info("Using a Base64-encoded JWT secret key");
+			keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+		} else {
+			_log.info("Using a Base64-encoded JWT secret key");
 
-            keyBytes = Decoders.BASE64.decode(secret);
-        }
+			keyBytes = Decoders.BASE64.decode(secret);
+		}
 
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+		this.key = Keys.hmacShaKeyFor(keyBytes);
+
+		//jwt parser
+		this.jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
+		// init cache
+		this.attemptsCache = CacheBuilder.newBuilder()
+				.expireAfterWrite(properties.getTokenRememberMeDuration(), TimeUnit.DAYS)
+				.build(new CacheLoader<String, String>() {
+					@Override
+					public String load(final String key) {
+						return StringPool.BLANK;
+					}
+				});
+	}
 
     // access token
 
-    public JWTToken createAccessToken(UserPrincipal userPrincipal, String username, String authorities, Date duration) {
-    	String hashKey = getHashKey(username);
-    	
-    	userPrincipal.setHashKey(hashKey);
-    	
-    	//lưu userPrincipal vào redis, thời gian lưu đc cấu hình
-		redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, userPrincipal,
-				properties.getDataDuration(), TimeUnit.MINUTES);
-    	
-    	String jwt = Jwts.builder()
-                .setSubject(username)
-                .claim(SecurityConstants.Jwt.PRIVILEGES, authorities)
-                .claim(SecurityConstants.Jwt.HASHKEY, hashKey)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setIssuedAt(new Date())
-                .setExpiration(duration).compact();
-    	
-    	// save token to db
-        AccessToken accessToken = AccessToken.builder()
-                .token(jwt)
-                .expiredDate(duration.toInstant())
-                .expired(false)
-                .username(username)
-                .userId(userPrincipal.getUser().getId())
-                .build();
-        
-        accessTokenService.create(accessToken);
+    public Cookie clearCookie(String key) {
+    	Cookie cookie = new Cookie(key, StringPool.BLANK);
 
-        return new JWTToken(jwt, duration.toInstant());
+    	cookie.setPath("/");
+    	cookie.setMaxAge(0);
+    	cookie.setHttpOnly(true);
+
+    	return cookie;
     }
-    
-	public JWTToken createAccessToken(String username) {
-		try {
-			UserDetails principal = userDetailsService.loadUserByUsername(username);
 
-			Date validity = DateUtils.getDateAfter(new Date(), properties.getTokenDuration());
+	public HttpCookie clearHttpCookie(String key) {
 
-			String authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-					.collect(Collectors.joining(","));
+        return ResponseCookie.from(key, StringPool.BLANK)
+        		.maxAge(0)
+                .httpOnly(properties.isHttpOnly())
+                .path(properties.getPath())
+                .secure(properties.isEnableSsl())
+                .sameSite(properties.getSameSite())
+                .build();
+    }
 
-			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
-        } catch (UsernameNotFoundException e) {
-            throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
-                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
-        }
-	}
-    
 	public JWTToken createAccessToken(Authentication authentication, boolean rememberMe) {
 		try {
 			String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
@@ -146,79 +137,118 @@ public class JWTTokenProvider implements InitializingBean {
 			UserDetails principal = ob instanceof UserPrincipal ? (UserPrincipal) ob
 					: userDetailsService.loadUserByUsername(username);
 
-			Date validity = DateUtils.getDateAfter(new Date(),
-					(rememberMe ? properties.getTokenDuration() : properties.getTokenRememberMeDuration()));
+			int duration = rememberMe ? properties.getTokenDuration() : properties.getTokenRememberMeDuration();
 
-			return createAccessToken((UserPrincipal) principal, username, authorities, validity);
+			return createAccessToken(((UserPrincipal) principal).getUser(), username, authorities, duration);
 		} catch (UsernameNotFoundException e) {
-		    throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USER_OR_PASSWORD),
-                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USER_OR_PASSWORD);
+		    _log.error(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD));
+
+		    throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD);
 		}
 	}
 
     /*
      * Create refresh token
      */
-    
-    public JWTToken createRefreshToken(Authentication authentication) {
-        String username = authentication.getName();
-        
-        String refreshToken = HMACUtil.hashSha256(UUID.randomUUID().toString() + username);
-        
-        //store in resdis
-        String hashKey = getHashKey(username);
-        
-        redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.REFRESH_TOKEN, refreshToken,
-                properties.getRefeshTokenDuration(), TimeUnit.DAYS);
-        
-        return new JWTToken(refreshToken,
-                DateUtils.getDateAfter(new Date(), properties.getRefeshTokenDuration()).toInstant());
+
+	public JWTToken createAccessToken(String username) {
+		try {
+			UserDetails principal = userDetailsService.loadUserByUsername(username);
+
+			String authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+					.collect(Collectors.joining(","));
+
+			return createAccessToken(((UserPrincipal) principal).getUser(), username, authorities,
+					properties.getTokenDuration());
+        } catch (UsernameNotFoundException e) {
+            _log.error(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD));
+
+            throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD),
+                    User.class.getSimpleName(), LabelKey.ERROR_INVALID_USERNAME_OR_PASSWORD);
+        }
+	}
+
+	public JWTToken createAccessToken(User user, String username, String authorities, int duration) {
+    	Date expiration = DateUtils.getDateAfter(new Date(), duration);
+
+    	String jwt = Jwts.builder()
+                .setSubject(username)
+                .claim(SecurityConstants.Header.PRIVILEGES, authorities)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setIssuedAt(new Date())
+                .setExpiration(expiration).compact();
+
+    	this.attemptsCache.put(username, jwt);
+
+        return new JWTToken(jwt, duration * 24 * 60 * 60);
     }
-    
-	public Authentication getAuthentication(String token) {
-		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+
+    public Cookie createCookie(String key, String value) {
+    	Cookie cookie = new Cookie(key, value);
+
+    	cookie.setPath("/");
+    	cookie.setHttpOnly(true);
+
+    	return cookie;
+    }
+
+    public HttpCookie createHttpCookie(String key, String value, int duration) {
+
+        return ResponseCookie.from(key, value)
+        		.maxAge(duration)
+                .httpOnly(properties.isHttpOnly())
+                .path(properties.getPath())
+                .secure(properties.isEnableSsl())
+                .sameSite(properties.getSameSite())
+                .build();
+    }
+
+    public JWTToken createRefreshToken(Authentication authentication) {
+		String username = authentication.getName();
+
+		String refreshToken = HMACUtil.hashSha256(UUID.randomUUID().toString() + username);
+
+		return new JWTToken(refreshToken, properties.getRefeshTokenDuration() * 24 * 60 * 60);
+	}
+
+    public Authentication getAuthentication(String token) {
+		Claims claims = jwtParser.parseClaimsJws(token).getBody();
 
 		Collection<? extends GrantedAuthority> authorities = Arrays
-				.stream(claims.get(SecurityConstants.Jwt.PRIVILEGES).toString().split(","))
+				.stream(claims.get(SecurityConstants.Header.PRIVILEGES).toString().split(","))
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
 		String username = claims.getSubject();
 
-		String hashKey = claims.get(SecurityConstants.Jwt.HASHKEY).toString();
-
-		// retrieve UserDetails from redis
-		// nếu không có ob thì tạo mới và lưu lại
-		Object ob = redisService.hget(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL);
-
-		UserPrincipal principal = null;
-
-		if (Validator.isNotNull(ob) && (ob instanceof UserPrincipal)) {
-			principal = (UserPrincipal) ob;
-
-			//kiểm tra lại hashset
-            if (!hashKey.equals(principal.getHashKey())) {
-                throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_INVALID_TOKEN),
-                        User.class.getSimpleName(), LabelKey.ERROR_INVALID_TOKEN);
-            }
-		} else {
-			principal = (UserPrincipal) userDetailsService.loadUserByUsername(username);
-
-			principal.setHashKey(hashKey);
-
-			redisService.hset(getRedisKey(username, hashKey), SecurityConstants.Jwt.USER_DETAIL, principal,
-					properties.getDataDuration(), TimeUnit.MINUTES);
-		}
-
-		//test thử ném ra exception
+		UserPrincipal principal = (UserPrincipal) userDetailsService.loadUserByUsername(username);
 
 		return new UsernamePasswordAuthenticationToken(principal, token, authorities);
 	}
+
+    public void invalidateToken() {
+        Optional<User> userOptional = SecurityUtils.getUserLogin();
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            String username = user.getUsername();
+
+            String token = this.attemptsCache.getIfPresent(username);
+            // invalidate all token belong to username in cache
+            this.attemptsCache.invalidate(username);
+
+            if (_log.isDebugEnabled()) {
+                _log.debug("{} token(s) expired", token);
+            }
+        }
+    }
 
     public boolean validateToken(String authToken) {
         String username = StringPool.BLANK;
 
         try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken).getBody();
+            Claims claims = jwtParser.parseClaimsJws(authToken).getBody();
 
             username = claims.getSubject();
         } catch (MalformedJwtException ex) {
@@ -243,60 +273,74 @@ public class JWTTokenProvider implements InitializingBean {
             _log.error("Invalid JWT signature.", e);
         }
 
-        return !isTokenInBlackList(username, authToken);
+        return isTokenInStore(username, authToken);
     }
 
-    public void invalidateToken() {
-        Optional<UserDetails> userDetails = SecurityUtils.geUserDetails();
+    public boolean validateToken(String authToken, String csrfToken) {
+        String username = StringPool.BLANK;
 
-        if (userDetails.isPresent() && (userDetails.get() instanceof UserPrincipal)) {
-            UserPrincipal userPrincipal = (UserPrincipal) userDetails.get();
+		try {
+			Claims claims = jwtParser.parseClaimsJws(authToken).getBody();
 
-            String username = userPrincipal.getUsername();
+			username = claims.getSubject();
 
-            String hashKey = userPrincipal.getHashKey();
+			String csrfTokenDecode = rsaProvider.decrypt(csrfToken);
 
-            // remove data from redis
-            redisService.hdelete(getRedisKey(username, hashKey));
+			if (Validator.isNull(csrfTokenDecode)) {
+				return false;
+			}
 
-            // invalidate all token belong to username in db
-            int result = accessTokenService.expiredTokenByUsername(username);
+			String[] csrfPart = StringUtil.split(csrfTokenDecode, StringPool.DASH);
 
-            if (_log.isDebugEnabled()) {
-                _log.debug("{} token(s) expired", result);
-            }
+			if (csrfPart.length != 2) {
+				return false;
+			}
+
+				long timestampt = GetterUtil.getLongValue(csrfPart[0], 0);
+
+			String principal = csrfPart[1];
+
+			if (timestampt <= 0 || !principal.equals(username) || !invalidCsrfTimestamp(timestampt)) {
+				return false;
+			}
+		} catch (MalformedJwtException ex) {
+            _log.error("Invalid JWT token");
+
+            throw new InvalidTokenRequestException("JWT", authToken, "Malformed jwt token");
+
+        } catch (ExpiredJwtException ex) {
+            _log.error("Expired JWT token");
+
+            throw new InvalidTokenRequestException("JWT", authToken, "Token expired. Refresh required");
+
+        } catch (UnsupportedJwtException ex) {
+            _log.error("Unsupported JWT token");
+            throw new InvalidTokenRequestException("JWT", authToken, "Unsupported JWT token");
+
+        } catch (IllegalArgumentException ex) {
+            _log.error("JWT claims string is empty.");
+
+            throw new InvalidTokenRequestException("JWT", authToken, "Illegal argument token");
+        } catch (Exception e) {
+            _log.error("Invalid JWT signature.", e);
+
+			throw new BadRequestAlertException(Labels.getLabels(LabelKey.ERROR_BAD_REQUEST), "token",
+					LabelKey.ERROR_BAD_REQUEST);
         }
+
+        return isTokenInStore(username, authToken);
     }
 
-    public Optional<JWTToken> refreshToken(String username, String refreshToken) {
-        String hashKey = getHashKey(username);
-
-        return Optional
-                .ofNullable(redisService.hget(getRedisKey(username, hashKey), SecurityConstants.Jwt.REFRESH_TOKEN))
-                .map(ob -> {
-                    return createAccessToken(username);
-                });
-    }
-    
-    private boolean isTokenInBlackList(String username, String token) {
-        Optional<AccessToken> accessToken = accessTokenService.findById(token);
-
-        if (Validator.isNull(username) || !accessToken.isPresent()) {
-            return true;
-        }
-
-        AccessToken aToken = accessToken.get();
-
-        return !username.equalsIgnoreCase(aToken.getCreatedBy())
-                || aToken.getExpiredDate().isBefore(Instant.now())
-                || aToken.isExpired();
+    private boolean isTokenInStore(String username, String token) {
+    	return Validator.isNotNull(username) && Validator.isNotNull(this.attemptsCache.getIfPresent(username));
     }
 
-    private String getHashKey(String username) {
-        return Validator.isNotNull(username) ? DigestUtils.md5DigestAsHex(username.getBytes()) : StringPool.BLANK;
-    }
+	private boolean invalidCsrfTimestamp(long timestamp) {
+		Instant csrfTimestamp = Instant.ofEpochMilli(timestamp);
+		Instant now = Instant.now();
 
-    private String getRedisKey(String username, String hashKey) {
-        return String.format("%s:%s", username, hashKey);
-    }
+		csrfTimestamp = csrfTimestamp.plusSeconds(properties.getCsrfTokenDuration());
+
+		return csrfTimestamp.isAfter(now);
+	}
 }

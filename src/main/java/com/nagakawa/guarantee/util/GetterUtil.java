@@ -8,8 +8,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -514,13 +515,12 @@ public class GetterUtil {
 		return intValues;
 	}
 
-	// Hung add
-	public static int getLong(Long value, long defaultValue) {
+	public static long getLong(Object value, long defaultValue) {
 		if (value == null) {
-			return -1;
+			return defaultValue;
 		}
 
-		return value.intValue();
+		return getLong(value.toString());
 	}
 
 	public static Long getLong(Object value) {
@@ -529,7 +529,6 @@ public class GetterUtil {
 		}
 
 		return getLong(value.toString());
-
 	}
 
 	public static Long getLong(String value) {
@@ -569,7 +568,21 @@ public class GetterUtil {
 	public static long[] getLongValues(String[] values) {
 		return getLongValues(values, DEFAULT_LONG_VALUES);
 	}
+	
+	public static List<Long> getLongValues(List<String> values) {
+		if (values == null) {
+			return new ArrayList<>();
+		}
 
+		List<Long> longValues = new ArrayList<>();
+
+		for (String value: values) {
+			longValues.add(getLong(value));
+		}
+
+		return longValues;
+	}
+	
 	public static long[] getLongValues(String[] values, long[] defaultValue) {
 		if (values == null) {
 			return defaultValue;

@@ -1,13 +1,14 @@
 package com.nagakawa.guarantee.security.response;
 
-import java.time.Instant;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
 @Builder
+@JsonInclude(Include.NON_NULL)
 public class TokenResponse {
     private String accessToken;
     
@@ -15,7 +16,7 @@ public class TokenResponse {
     
     private String tokenType;
     
-    private Instant accessTokenExpiredAt;
+    private int accessTokenDuration;
     
-    private Instant refreshTokenExpiredAt;
+    private int refreshTokenDuration;
 }

@@ -1,6 +1,7 @@
 spring:
   application:
     name: nagakawa_guarantee
+    time_zone: GMT+7                
   profiles:
     # The commented value for `active` can be replaced with valid Spring profiles to load.
     # Otherwise, it will be filled in by maven when building the JAR file
@@ -11,6 +12,7 @@ spring:
     properties:
       hibernate.jdbc.time_zone: UTC
       hibernate.enable_lazy_load_no_trans: true
+      hibernate.session.events.log.LOG_QUERIES_SLOWER_THAN_MS: 30                                                           
     hibernate:
       ddl-auto: none
       naming:
@@ -31,3 +33,42 @@ spring:
     enabled: false
   firebase:
     fcm-account-service: firebase/fcm.json
+  main:
+    allow-bean-definition-overriding: true
+kaptcha:
+ config:
+  image-width: 100
+  image-height: 40
+  text-producer-char-string: '0123456789'
+  text-producer-char-length: 4
+  text-producer-font-size: 30
+  text-producer-char-space: 5
+  text-producer-font-names: Arial,Arial Narrow,Serif,Helvetica,Tahoma,Times New Roman,Verdana
+  text-producer-font-color: 45,33,136
+  background-clear-from: 'white'
+  background-clear-to: 'white'
+  header-name: X-KAPTCHA-HEADER
+  use-border: 'no'
+  duration: 5     
+validation:
+  password-regex: ^(?=.*[a-z])(?=.*[A-Z]).{8,}$ #password ít nhất 8 ký tự , 1 chữ thường, 1 chữ hoa .. advance ^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$
+  username-regex: '^[a-zA-Z0-9]([._](?![._])|[a-zA-Z0-9]){1,72}[a-zA-Z0-9]$' #ky tu so + chu , ký tự (. _), do dai tu 3 den 75
+  email-regex: '^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,35})$' #email không quá 100 ký tự
+  phone-number-regex: '^((\\s){0,}((\\+84-?)|0))((9|8|7|3|5|4|2)[0-9]{8,9}(\\s){0,})$'
+  coordinate-regex: '^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$'
+  phone-number-min-length: 4
+  phone-number-max-length: 11
+  fullname-min-length: 2
+  fullname-max-length: 200
+  username-min-length: 3
+  username-max-length: 75
+  password-min-length: 8
+  password-max-length: 50
+  email-min-length: 4
+  email-max-length: 100
+  name-max-length: 255
+  code-min-length: 2
+  code-max-length: 50
+  address-max-length: 255
+  description-max-length: 255
+  int-number-max-length: 10                                         

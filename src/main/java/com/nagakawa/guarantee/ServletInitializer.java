@@ -1,14 +1,11 @@
 package com.nagakawa.guarantee;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.EnumSet;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -16,15 +13,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.nagakawa.guarantee.cache.CachingHttpHeadersFilter;
-import com.nagakawa.guarantee.configuration.AuthenticationProperties;
 import com.nagakawa.guarantee.configuration.EnvConstants;
-
+import com.nagakawa.guarantee.security.configuration.AuthenticationProperties;
+import com.nagakawa.guarantee.util.StringPool;
+import com.nagakawa.guarantee.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,8 +33,6 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
 	private final AuthenticationProperties ap;
     
     private final Environment env;
-    
-    private final RedisTemplate<String, Object> redisTemplate;
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -58,20 +54,6 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
         
         _log.info("Web application fully configured");
     }
-
-	@PostConstruct
-    public void connection() {
-        try {
-            //check if redis server is available
-        	redisTemplate.getConnectionFactory().getConnection();
-        } catch (Exception e) {
-            System.out.println("-------------------------------------------------------------------------------------------");
-            System.out.println("- Redis host and port is not availables. please check application configuration file. -");
-            System.out.println("-------------------------------------------------------------------------------------------");
-            
-            System.exit(-1);
-        }
-    }
     /**
      * Initializes the caching HTTP Headers Filter.
      */
@@ -90,14 +72,18 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         
-        CorsConfiguration config = new CorsConfiguration();
-        
-        config.setAllowedHeaders(Collections.singletonList(ap.getAllowedHeaders()));
-        config.setAllowedMethods(Collections.singletonList(ap.getAllowedMethods()));
-        config.addAllowedOrigin(ap.getAllowedOrigins());
-        config.setExposedHeaders(Collections.singletonList(ap.getExposedHeaders()));
-        config.setAllowCredentials(ap.isAllowCredentials());
-        config.setMaxAge(ap.getMaxAge());
+		CorsConfiguration config = new CorsConfiguration();
+
+		config.setAllowedHeaders(
+				Arrays.asList(StringUtil.split(ap.getAllowedHeaders(), StringPool.COMMA)));
+		config.setAllowedMethods(
+				Arrays.asList(StringUtil.split(ap.getAllowedMethods(), StringPool.COMMA)));
+		config.setAllowedOrigins(
+				Arrays.asList(StringUtil.split(ap.getAllowedOrigins(), StringPool.COMMA)));
+		config.setExposedHeaders(
+				Arrays.asList(StringUtil.split(ap.getExposedHeaders(), StringPool.COMMA)));
+		config.setAllowCredentials(ap.isAllowCredentials());
+		config.setMaxAge(ap.getMaxAge());
         
         if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
             _log.info("Registering CORS filter");
@@ -108,4 +94,20 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
         
         return new CorsFilter(source);
     }
+	
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurer() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**")//
+						.exposedHeaders(StringUtil.split(ap.getExposedHeaders(), StringPool.COMMA))
+						.allowedOrigins(StringUtil.split(ap.getAllowedOrigins(), StringPool.COMMA))//
+						.allowedHeaders(StringUtil.split(ap.getAllowedHeaders(), StringPool.COMMA))
+						.allowedMethods("GET", "POST", "OPTIONS")//
+						.maxAge(ap.getMaxAge());
+				;
+			}
+		};
+	}
 }

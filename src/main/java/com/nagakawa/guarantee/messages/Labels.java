@@ -9,12 +9,16 @@ package com.nagakawa.guarantee.messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
-
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import com.nagakawa.guarantee.security.util.SecurityConstants;
+import com.nagakawa.guarantee.util.GetterUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,11 +29,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class Labels {
+	public interface Language {
+		public static final String EN = "en";
+		
+		public static final String VI = "vi";
+	}
+	
+	public interface Country {
+		public static final String VN = "VN";
+		
+		public static final String US = "us";
+	}
     /** The Constant US. */
     public static final Locale US = Locale.US;
 
     /** The Constant VN. */
-    public static final Locale VN = new Locale("vi", "VN");
+    public static final Locale VN = new Locale(Language.VI, Country.VN);
     /** The Constant _log. */
 
     /** The c available locale list. */
@@ -68,7 +83,7 @@ public class Labels {
      * @return the default locale
      */
     public static Locale getDefaultLocale() {
-        return Locale.getDefault();
+        return VN;
     }
 
     /**
@@ -79,7 +94,7 @@ public class Labels {
      * @return the labels
      */
     public static String getLabels(String key) {
-        return getLabels(key, null, getDefaultLocale());
+        return getLabels(key, null, getRequestLocale());
     }
 
     /**
@@ -105,7 +120,7 @@ public class Labels {
      * @return the labels
      */
     public static String getLabels(String key, Object[] objs) {
-        return getLabels(key, objs, getDefaultLocale());
+        return getLabels(key, objs, getRequestLocale());
     }
 
     /**
@@ -215,6 +230,35 @@ public class Labels {
         return locale;
     }
 
+	public static Locale getRequestLocale() {
+		String language = getLanguageFromRequest();
+
+		switch (language) {
+			case Language.VI:
+				return VN;
+			case Language.EN:
+				return US;
+			default:
+				return VN;
+		}
+	}
+	
+	public static String getLanguageFromRequest() {
+		HttpServletRequest request = null;
+
+		RequestAttributes requestAttr = RequestContextHolder.getRequestAttributes();
+
+		if (requestAttr instanceof ServletRequestAttributes) {
+			request = ((ServletRequestAttributes) requestAttr).getRequest();
+		}
+
+		if (request == null) {
+			return Language.VI;
+		}
+
+		return GetterUtil.getString(request.getHeader(SecurityConstants.Header.LOCALE), Language.VI);
+
+	}
     /**
      * Gets the locale.
      *

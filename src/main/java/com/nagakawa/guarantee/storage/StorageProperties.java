@@ -1,19 +1,19 @@
 package com.nagakawa.guarantee.storage;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-
-import lombok.Getter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import lombok.Data;
 
 /**
  * @author LinhLH
  */
-@Configuration
-@Getter
+@Data
+@Component
+@ConfigurationProperties(prefix = "storage")
 public class StorageProperties {
-	@Value("${application.folderUpload}")
     private String folderUpload;
     
-	@Value("${application.template}")
     private String template;
+    
+    private int fileKeyStoreDuration;
 }

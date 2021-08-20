@@ -15,7 +15,7 @@ public class JWTConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilt
 
     @Override
     public void configure(HttpSecurity http) {
-        JWTFilter customFilter = new JWTFilter(jwtTokenProvider);
+    	JWTCookieFilter customFilter = new JWTCookieFilter(jwtTokenProvider);
         
         http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
     }

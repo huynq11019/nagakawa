@@ -13,11 +13,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author os_linhlh2
  */
+@Slf4j
 public class Validator {
 	private static final int _CHAR_BEGIN = 65;
 
@@ -34,13 +36,15 @@ public class Validator {
 
 	private static Pattern _codeStringPattern = Pattern.compile(Constants.Regex.CODE);
 
-	private static Pattern _emailAddressPattern = Pattern.compile(Constants.Regex.EMAIL);
+	private static Pattern _emailAddressPattern = Pattern.compile(Constants.Regex.EMAIL, Pattern.CASE_INSENSITIVE);
 
 	private static Pattern _ipV4AddressPattern = Pattern.compile(Constants.Regex.IPV4);
 	
 	private static Pattern _ipV6AddressPattern = Pattern.compile(Constants.Regex.IPV6);
 
 	private static Pattern _numberPattern = Pattern.compile(Constants.Regex.NUMBER);
+	
+	private static Pattern _vnPhoneNumberPattern = Pattern.compile(Constants.Regex.PHONE_REGEX);
 
 	private static Pattern _variableNamePattern = Pattern.compile(Constants.Regex.USERNAME);
 
@@ -71,7 +75,7 @@ public class Validator {
 			Matcher m = p.matcher(value);
 			test = m.matches();
 		} catch (Exception e) {
-			e.printStackTrace();
+			_log.warn("Khong check duoc regex: ", e);
 		}
 
 		return test;
@@ -989,11 +993,7 @@ public class Validator {
 
 		Matcher matcher = _numberPattern.matcher(number);
 
-		if (matcher.matches()) {
-			return true;
-		} else {
-			return false;
-		}
+		return matcher.matches();
 	}
 
 	/**
@@ -1034,6 +1034,12 @@ public class Validator {
 		return isNumber(phoneNumber);
 	}
 
+	public static boolean isVNPhoneNumber(String phoneNumber) {
+		Matcher matcher = _vnPhoneNumberPattern.matcher(phoneNumber);
+
+		return matcher.matches();
+	}
+	
 	public static boolean isPort(String input) {
 		if (input != null && input.matches(Constants.Regex.PORT)) {
 			return true;

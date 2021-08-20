@@ -1,10 +1,8 @@
 package com.nagakawa.guarantee.security;
 
 import java.util.Optional;
-
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
-
 import com.nagakawa.guarantee.security.util.SecurityConstants;
 import com.nagakawa.guarantee.security.util.SecurityUtils;
 
@@ -16,6 +14,6 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
 	@Override
 	public Optional<String> getCurrentAuditor() {
-		return Optional.of(SecurityUtils.getCurrentUserLogin().orElse(SecurityConstants.Account.SYSTEM));
+		return Optional.of(SecurityUtils.getCurrentUserLogin().orElse(SecurityConstants.Account.SUPER_AMDIN));
 	}
 }
