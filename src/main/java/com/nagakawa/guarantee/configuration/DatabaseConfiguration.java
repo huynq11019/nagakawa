@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-@EnableJpaRepositories("com.vaccination.registration.repository")
+@EnableJpaRepositories("com.nagakawa.guarantee.repository")
 @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
 @EnableTransactionManagement
 public class DatabaseConfiguration {
