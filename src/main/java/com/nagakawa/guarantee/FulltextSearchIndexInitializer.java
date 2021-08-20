@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author LinhLH
  */
 @Slf4j
-@Component
+//@Component
 @Getter
 public class FulltextSearchIndexInitializer implements ApplicationListener<ApplicationReadyEvent> {
 

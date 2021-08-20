@@ -2,17 +2,9 @@ package com.nagakawa.guarantee.model.dto;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Set;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.nagakawa.guarantee.util.Constants;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,29 +19,16 @@ public class UserDTO implements Serializable {
 
 	private Long id;
 
-	@NotBlank(message = "Tên đăng nhập không được bỏ trống")
-    @Pattern(regexp = Constants.Regex.USERNAME)
-    @Size(min = 1, max = 50)
 	private String username;
 
-	private String createdBy;
-
-	private Instant createdDate;
-
-	private String lastModifiedBy;
-
-	private Instant lastModifiedDate;
-
-	@Size(max = 50)
 	private String fullname;
 
-	@Size(min = 6, max = 20, message = "Mật khẩu phải có độ dài từ 6 đến 20 ký tự")
 	private String password;
+	
+	private String confirmPassword;
 	
 	private Instant dateOfBirth;
 	
-	@Email(regexp = Constants.Regex.EMAIL, message = "Nhập email đúng định dạng")
-    @Size(min = 5, max = 254)
 	private String email;
 	
 	private String phoneNumber;
@@ -58,11 +37,13 @@ public class UserDTO implements Serializable {
 	
 	private String description;
 	
-	private Integer roleUpdatable;
+	private boolean roleUpdatable;
 	
-	private Set<String> privileges;
-
-	private String confirmPassword;
+	private Integer minRoleLevel;
+	
+	private List<String> roleNames;
+	
+	private List<Long> roleIds;
 
 	private String oldPassword;
 
