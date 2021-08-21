@@ -18,7 +18,7 @@ public class CacheProperties {
 
     private Integer timeToLiveSeconds;
 
-    private int backupCount = 1;
+    private int backupCount;
 
     private ManagementCenter managementCenter;
 
@@ -26,8 +26,8 @@ public class CacheProperties {
     @Setter
     @NoArgsConstructor
     public static class ManagementCenter {
-        private boolean enabled = false;
-        private int updateInterval = 3;
-        private String url = "";
+        private boolean enabled;
+        private int updateInterval;
+        private String url;
     }
 }
