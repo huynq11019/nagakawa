@@ -7,6 +7,8 @@ public final class ApiConstants {
 		public static final String ACCOUNT = "account";
 
 		public static final String CAPTCHA = "captcha";
+		
+		public static final String CONTENT_TEMPLATE = "content-template";
 
 		public static final String DISTRICT = "district";
 
