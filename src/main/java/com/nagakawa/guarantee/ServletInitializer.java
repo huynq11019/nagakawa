@@ -2,6 +2,7 @@ package com.nagakawa.guarantee;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import javax.annotation.PostConstruct;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -34,6 +36,21 @@ public class ServletInitializer extends SpringBootServletInitializer implements 
     
     private final Environment env;
 	
+    private final RedisTemplate<String, Object> redisTemplate;
+    
+    @PostConstruct
+    public void connection() {
+        try {
+        	redisTemplate.getConnectionFactory().getConnection();
+        } catch (Exception e) {
+            System.out.println("-------------------------------------------------------------------------------------------");
+            System.out.println("- Redis host and port is not availables. please check application configuration file. -");
+            System.out.println("-------------------------------------------------------------------------------------------");
+            
+            System.exit(-1);
+        }
+    }
+    
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(NagakawaGuaranteeApplication.class);
