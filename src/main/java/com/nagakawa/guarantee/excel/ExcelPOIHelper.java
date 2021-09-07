@@ -73,33 +73,33 @@ public class ExcelPOIHelper {
 	}
 
 	public String readCellContent(Cell cell) {
-		String content;
+		String content = StringPool.BLANK;
 
 		switch (cell.getCellType()) {
 
-		case STRING:
-			content = GetterUtil.getString(cell.getStringCellValue());
+			case STRING:
+				content = GetterUtil.getString(cell.getStringCellValue());
 
-			break;
-		case NUMERIC:
-			if (DateUtil.isCellDateFormatted(cell)) {
+				break;
+			case NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
 
-				content = DateUtils.formatLongDate(cell.getDateCellValue());
-			} else {
-				content = new BigDecimal(cell.getNumericCellValue()).toString();
-			}
+					content = DateUtils.formatLongDate(cell.getDateCellValue());
+				} else {
+					content = new BigDecimal(cell.getNumericCellValue()).toString();
+				}
 
-			break;
-		case BOOLEAN:
-			content = cell.getBooleanCellValue() + "";
+				break;
+			case BOOLEAN:
+				content = cell.getBooleanCellValue() + StringPool.BLANK;
 
-			break;
-		case FORMULA:
-			content = cell.getCellFormula() + "";
+				break;
+			case FORMULA:
+				content = cell.getCellFormula() + StringPool.BLANK;
 
-			break;
-		default:
-			content = "";
+				break;
+			default:
+				content = StringPool.BLANK;
 		}
 
 		return content;
